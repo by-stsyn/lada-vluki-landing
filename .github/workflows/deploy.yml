@@ -1,0 +1,35 @@
+name: Deploy to Reg.ru FTP
+
+on:
+  push:
+    branches:
+      - main # Деплой будет срабатывать только при пуше в ветку main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚚 Checkout code
+      uses: actions/checkout@v3
+
+    - name: 📦 Install Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18' # Если используешь другую версию Node.js, можешь поменять
+
+    - name: 🔨 Install Dependencies
+      run: npm install
+
+    - name: 🏗️ Build Project
+      run: npm run build
+
+    - name: 🚀 Sync files via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        local-dir: ./dist/ # Vite собирает готовый сайт в папку dist
+        server-dir: ./ # Кидаем файлы прямо в корень папки на сервере
+        dangerous-clean-slate: false
