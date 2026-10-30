@@ -8,32 +8,26 @@ import CarSlider from './components/CarSlider';
 import CreditCalculator from './components/CreditCalculator';
 import { CarsInStock } from './components/CarsInStock';
 import CarDetailsPage from './CarDetailsPage';
+import { saveUtmParams, trackGoal } from './components/calltouch';
 
 function App() {
   const [modalType, setModalType] = useState<'contact' | 'testdrive' | null>(null);
   const [selectedCar, setSelectedCar] = useState<string>('');
   const [showSuccess, setShowSuccess] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentPath, setCurrentPath] = useState<string>(window.location.pathname);
 
-  // === НАЧАЛО: БУДИЛЬНИК ДЛЯ SUPABASE ===
   useEffect(() => {
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-    
-    if (supabaseUrl && supabaseKey) {
-      fetch(`${supabaseUrl}/rest/v1/leads?select=id&limit=1`, {
-        method: 'GET',
-        headers: {
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`
-        }
-      }).catch(() => {}); 
-    }
+    saveUtmParams();
+    const handlePopState = () => {
+      setCurrentPath(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-  // === КОНЕЦ БУДИЛЬНИКА ===
 
   const handleReserve = (car: any) => {
-    const carModelName = `${car.brand} ${car.model} ${car.complectation}`;
+    const carModelName = [car.brand, car.model, car.complectation].filter(Boolean).join(' ');
     setSelectedCar(carModelName);
     setModalType('contact');
   };
@@ -57,13 +51,13 @@ function App() {
     { name: 'Niva Travel', id: 'niva-travel' },
   ];
 
-const cars = [
+  const cars = [
     { id: 'granta', name: 'Granta', badge: 'ХИТ ПРОДАЖ', price: 'от 680 000 ₽', benefit: 'Выгода до 300 000 ₽', images: ['/lada/granta-1.jpg', '/lada/granta-2.jpg', '/lada/granta-3.jpg', '/lada/granta-4.jpg'], specs: ['Седан', '1.6 л / 90 л.с.', '5МТ/АМТ', 'Передний привод'], features: ['Габариты: 4268×1700×1500 мм', 'Колёсная база: 2476 мм', 'Дорожный просвет: 180 мм', 'Разгон до 100 км/ч: 11.2 с', 'Макс. скорость: 179 км/ч', 'Расход: 6.8 л/100 км (смешанный)', 'Багажник: 520-815 л',], },
     { id: 'granta-cross', name: 'Granta Cross', badge: 'БЕЗДОРОЖЬЕ', price: 'от 912 000 ₽', benefit: 'Выгода до 300 000 ₽', images: ['/lada/granta-cross-1.jpg', '/lada/granta-cross-2.jpg', '/lada/granta-cross-3.jpg', '/lada/granta-cross-4.jpg'], specs: ['Универсал', '1.6 л / 98 л.с.', '5МТ', 'Передний привод'], features: ['Габариты: 4148×1700×1560 мм', 'Колёсная база: 2476 мм', 'Дорожный просвет: 198 мм', 'Разгон до 100 км/ч: 11.2 с', 'Макс. скорость: 172 км/ч', 'Расход: 6.8 л/100 км (смешанный)', 'Багажник: 355-670 л',], },
     { id: 'vesta', name: 'Vesta', badge: 'ПОПУЛЯРНАЯ', price: 'от 1 222 400 ₽', benefit: 'Выгода от 520 000 ₽', images: ['/lada/vesta-1.jpg', '/lada/vesta-2.jpg', '/lada/vesta-3.jpg', '/lada/vesta-4.jpg'], specs: ['Седан', '1.6-1.8 л / 106-122 л.с.', '5МТ', 'Передний привод'], features: ['Габариты: 4440×1764×1496 мм', 'Колёсная база: 2635 мм', 'Дорожный просвет: 171 мм', 'Разгон до 100 км/ч: 11.3 с', 'Макс. скорость: 182 км/ч', 'Расход: 7.3 л/100 км (смешанный)', 'Багажник: 480 л',], },
     { id: 'vesta-cross', name: 'Vesta Cross', badge: 'БЕЗДОРОЖЬЕ', price: 'от 1 552 800 ₽', benefit: 'Выгода до 480 000 ₽', images: ['/lada/vesta-cross-1.jpg', '/lada/vesta-cross-2.jpg', '/lada/vesta-cross-3.jpg', '/lada/vesta-cross-4.jpg'], specs: ['Универсал', '1.6-1.8 л / 106-122 л.с.', '5МТ/АМТ', 'Передний привод'], features: ['Габариты: 4445×1785×1522 мм', 'Колёсная база: 2635 мм', 'Дорожный просвет: 203 мм', 'Разгон до 100 км/ч: 12.6 с', 'Макс. скорость: 178 км/ч', 'Расход: 7.5 л/100 км (смешанный)', 'Багажник: 480-825 л',], },
     { id: 'largus', name: 'Largus', badge: 'СЕМЕЙНЫЙ', price: 'от 1 461 000 ₽', benefit: 'Выгода от 530 000 ₽', images: ['/lada/largus-1.jpg', '/lada/largus-2.jpg', '/lada/largus-3.jpg', '/lada/largus-4.jpg'], specs: ['Универсал/Фургон', '1.6 л / 90-106 л.с.', '5МТ', 'Передний привод'], features: ['Габариты: 4488×1735×1628 мм', 'Колёсная база: 2905 мм', 'Дорожный просвет: 172 мм', 'Разгон до 100 км/ч: 13.5-14 с', 'Макс. скорость: 160 км/ч', 'Расход: 7.5-7.8 л/100 км (смешанный)', 'Багажник: 560 л',], },
-    { id: 'iskra', name: 'Iskra', badge: 'НОВИНКА', price: 'от 1 093 600 ₽', benefit: 'Выгода до 350 000 ₽', images: ['/lada/iskra-1.jpg', '/lada/iskra-2.jpg', '/lada/iskra-3.jpg', '/lada/iskra-4.jpg'], specs: ['Седан', '1.6 л / 90-106 л.с.', '5МТ/6МТ/ВТ', 'Передний привод'], features: ['Габариты: 4333×1777×1517 мм', 'Колёсная база: 2603 мм', 'Дорожный просвет: 170 мм', 'Разгон до 100 км/ч: 12.3 с', 'Макс. скорость: 177 км/ч', 'Расход: 7.8 л/100 км (смешанный)', 'Багажник: 500 л (седан), 480 л (универсал)',], },
+    { id: 'iskra', name: 'Iskra', badge: 'НОВИНКА', price: 'от 1 093 600 ₽', benefit: 'Выгода до 350 000 ₽', images: ['/lada/iskra-1.jpg', '/lada/iskra-2.jpg', '/lada/iskra-cross-3.jpeg', '/lada/iskra-cross-4.jpeg'], specs: ['Седан', '1.6 л / 90-106 л.с.', '5МТ/6МТ/ВТ', 'Передний привод'], features: ['Габариты: 4333×1777×1517 мм', 'Колёсная база: 2603 мм', 'Дорожный просвет: 170 мм', 'Разгон до 100 км/ч: 12.3 с', 'Макс. скорость: 177 км/ч', 'Расход: 7.8 л/100 км (смешанный)', 'Багажник: 500 л (седан), 480 л (универсал)',], },
     { id: 'niva-legend', name: 'Niva Legend', badge: 'ЛЕГЕНДА', price: 'от 868 000 ₽', benefit: 'Выгода до 350 000 ₽', images: ['/lada/niva-legend-1.jpg', '/lada/niva-legend-2.jpg', '/lada/niva-legend-3.jpg', '/lada/niva-legend-4.jpg'], specs: ['Внедорожник', '1.7 л / 83 л.с.', '5МТ', 'Полный привод 4x4'], features: ['Габариты: 3740×1680×1640 мм', 'Колёсная база: 2200 мм', 'Дорожный просвет: 200 мм', 'Разгон до 100 км/ч: 17 с', 'Макс. скорость: 142 км/ч', 'Расход: 9.9 л/100 км (смешанный)', 'Багажник: 265-585 л',], },
     { id: 'niva-travel', name: 'Niva Travel', badge: 'ПРИКЛЮЧЕНИЯ', price: 'от 1 282 400 ₽', benefit: 'Выгода до 360 000 ₽', images: ['/lada/niva-travel-1.jpg', '/lada/niva-travel-2.jpg', '/lada/niva-travel-3.jpg', '/lada/niva-travel-4.jpg'], specs: ['Внедорожник', '1.8 л / 90 л.с.', '5МТ', 'Полный привод 4x4'], features: ['Габариты: 4099×1804×1690 мм', 'Колёсная база: 2450 мм', 'Дорожный просвет: 220 мм', 'Разгон до 100 км/ч: 19 с', 'Макс. скорость: 140 км/ч', 'Расход: 10.2 л/100 км (смешанный)', 'Багажник: 320-650 л',], },
   ];
@@ -93,9 +87,8 @@ const cars = [
     { label: 'Контакты', href: 'contacts' },
   ];
 
-  const path = window.location.pathname;
-  if (path.startsWith('/car/')) {
-    const carId = path.split('/car/')[1];
+  if (currentPath.startsWith('/car/')) {
+    const carId = decodeURIComponent(currentPath.split('/car/')[1] || '');
     return <CarDetailsPage carId={carId} />;
   }
   
@@ -126,11 +119,7 @@ const cars = [
               <a
                 href="tel:+78115395565"
                 className="flex items-center gap-2 text-sm font-bold text-gray-900 hover:text-[#303c48] transition"
-                onClick={() => {
-                  if (typeof window !== 'undefined' && (window as any).ym) {
-                    (window as any).ym(96344039, 'reachGoal', 'zvonok');
-                  }
-                }}
+                onClick={() => trackGoal('zvonok')}
               >
                 <Phone className="w-4 h-4" />
                 <span className="hidden sm:inline">+7 (811) 539-55-65</span>
@@ -602,11 +591,7 @@ const cars = [
 <a 
                       href="tel:+78115395565" 
                       className="text-[#f7761f] hover:text-[#e66718] font-bold text-xl"
-                      onClick={() => {
-                        if (typeof window !== 'undefined' && (window as any).ym) {
-                          (window as any).ym(96344039, 'reachGoal', 'zvonok');
-                        }
-                      }}
+                      onClick={() => trackGoal('zvonok')}
                     >
                       +7 (811) 539-55-65
                     </a>

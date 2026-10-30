@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { sendToCalltouch, getUtmParams, trackGoal } from './calltouch';
 
 interface CreditCalculatorProps {
   onSuccess: () => void;
@@ -8,7 +9,7 @@ interface CreditCalculatorProps {
 
 export default function CreditCalculator({ onSuccess, carPrice, carModel }: CreditCalculatorProps) {
   const [price, setPrice] = useState(carPrice || 1000000);
-  const [initialPayment, setInitialPayment] = useState((carPrice || 1000000) * 0.2);
+  const [initialPayment, setInitialPayment] = useState(Math.round((carPrice || 1000000) * 0.2));
   const [months, setMonths] = useState(60);
   const [monthlyPayment, setMonthlyPayment] = useState(0);
 
@@ -23,16 +24,16 @@ export default function CreditCalculator({ onSuccess, carPrice, carModel }: Cred
   useEffect(() => {
     if (carPrice) {
       setPrice(carPrice);
-      setInitialPayment(carPrice * 0.2);
+      setInitialPayment(Math.round(carPrice * 0.2));
     }
   }, [carPrice]);
 
   useEffect(() => {
-    const loanAmount = price - initialPayment;
+    const loanAmount = Math.max(price - initialPayment, 0);
     const rate = 0.0001; // 0.01%
     const monthlyRate = rate / 12;
     const payment = loanAmount * (monthlyRate * Math.pow(1 + monthlyRate, months)) / (Math.pow(1 + monthlyRate, months) - 1);
-    setMonthlyPayment(Math.round(payment));
+    setMonthlyPayment(Math.max(Math.round(payment), 0));
   }, [price, initialPayment, months]);
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,31 +60,34 @@ export default function CreditCalculator({ onSuccess, carPrice, carModel }: Cred
     setLoading(true);
 
     try {
-      // Calltouch
-      try {
-        const ctData = new URLSearchParams();
-        ctData.append('fio', name);
-        ctData.append('phoneNumber', phone.replace(/\D/g, ''));
-        ctData.append('subject', 'Кредит: LADA Великие Луки');
-        ctData.append('comment', `Авто: ${carModel || 'Не указано'} | Цена: ${price} руб | Взнос: ${initialPayment} руб | Срок: ${months} мес`);
-        ctData.append('requestUrl', window.location.href);
-        const sessionId = (window as any).call_value || (window as any).ct_local_session_id;
-        if (sessionId) ctData.append('sessionId', sessionId);
-        await fetch('https://api.calltouch.ru/calls-service/RestAPI/requests/51665/register/', { method: 'POST', body: ctData });
-      } catch (e) {}
+      // 1. Отправка в Calltouch с подписью города Великие Луки
+      await sendToCalltouch({
+        fio: name,
+        phone,
+        subject: 'Кредит: LADA Великие Луки',
+        comment: `Форма: Кредитный калькулятор | Авто: ${carModel || 'Не указано'} | Цена: ${price.toLocaleString('ru-RU')} руб | Взнос: ${initialPayment.toLocaleString('ru-RU')} руб | Срок: ${months} мес | Платеж: ${monthlyPayment.toLocaleString('ru-RU')} руб/мес`,
+        tags: carModel ? `Кредит,${carModel}` : 'Кредит',
+      });
 
-      // Web3Forms
+      // 2. Отправка в Web3Forms
+      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || 'cf05b6d7-94ea-4763-afbc-9b5b7619a6a4';
+      const utm = getUtmParams();
       const formData = {
-        access_key: 'cf05b6d7-94ea-4763-afbc-9b5b7619a6a4',
+        access_key: accessKey,
         subject: '💰 Кредит: LADA Великие Луки',
-        from_name: 'LADA Landing',
+        from_name: 'LADA Прагматика Великие Луки',
+        'Город': 'Великие Луки (Прагматика LADA)',
         'Имя клиента': name,
         'Телефон': phone,
         'Интересует авто': carModel || 'Любое',
-        'Стоимость автомобиля': `${price.toLocaleString()} руб.`,
-        'Первый взнос': `${initialPayment.toLocaleString()} руб.`,
+        'Стоимость автомобиля': `${price.toLocaleString('ru-RU')} руб.`,
+        'Первый взнос': `${initialPayment.toLocaleString('ru-RU')} руб.`,
         'Срок кредита': `${months} мес.`,
-        'Желаемый платеж': `${monthlyPayment.toLocaleString()} руб./мес.`
+        'Желаемый платеж': `${monthlyPayment.toLocaleString('ru-RU')} руб./мес.`,
+        'Страница': window.location.href,
+        ...(utm.utm_source && { 'UTM Source': utm.utm_source }),
+        ...(utm.utm_medium && { 'UTM Medium': utm.utm_medium }),
+        ...(utm.utm_campaign && { 'UTM Campaign': utm.utm_campaign }),
       };
 
       const response = await fetch('https://api.web3forms.com/submit', {
@@ -92,11 +96,10 @@ export default function CreditCalculator({ onSuccess, carPrice, carModel }: Cred
         body: JSON.stringify(formData)
       });
 
-      if (response.ok) {
-        if (typeof window !== 'undefined') {
-          if ((window as any).ym) { (window as any).ym(96344039, 'reachGoal', 'forma'); }
-          if ((window as any).ct) { (window as any).ct('goal', 'forma'); }
-        }
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        trackGoal('forma');
         setName(''); setPhone(''); setConsent(false);
         onSuccess();
       } else { throw new Error('API Error'); }

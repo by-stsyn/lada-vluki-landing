@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sendToCalltouch, getUtmParams, trackGoal } from './calltouch';
 
 interface TestDriveFormProps {
   onSuccess: () => void;
@@ -40,28 +41,30 @@ export default function TestDriveForm({ onSuccess, preselectedModel }: TestDrive
     setLoading(true);
 
     try {
-      // 1. Отправка в Calltouch
-      try {
-        const ctData = new URLSearchParams();
-        ctData.append('fio', name);
-        ctData.append('phoneNumber', phone.replace(/\D/g, ''));
-        ctData.append('subject', 'Тест-драйв: LADA Великие Луки');
-        if (preselectedModel) ctData.append('comment', `Модель для тест-драйва: ${preselectedModel}`);
-        ctData.append('requestUrl', window.location.href);
-        const sessionId = (window as any).call_value || (window as any).ct_local_session_id;
-        if (sessionId) ctData.append('sessionId', sessionId);
-
-        await fetch('https://api.calltouch.ru/calls-service/RestAPI/requests/51665/register/', { method: 'POST', body: ctData });
-      } catch (ctError) { console.error('Calltouch Error:', ctError); }
+      // 1. Отправка в Calltouch с подписью города Великие Луки
+      await sendToCalltouch({
+        fio: name,
+        phone,
+        subject: 'Тест-драйв: LADA Великие Луки',
+        comment: `Форма: Запись на тест-драйв | Модель: ${preselectedModel || 'Не выбрана'}`,
+        tags: preselectedModel ? `Тест-драйв,${preselectedModel}` : 'Тест-драйв',
+      });
 
       // 2. Отправка в Web3Forms
+      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || 'cf05b6d7-94ea-4763-afbc-9b5b7619a6a4';
+      const utm = getUtmParams();
       const formData = {
-        access_key: 'cf05b6d7-94ea-4763-afbc-9b5b7619a6a4',
+        access_key: accessKey,
         subject: '🚗 Тест-драйв: LADA Великие Луки',
-        from_name: 'LADA Landing',
+        from_name: 'LADA Прагматика Великие Луки',
+        'Город': 'Великие Луки (Прагматика LADA)',
         'Имя клиента': name,
         'Телефон': phone,
         'Интересующая модель': preselectedModel || 'Не указана',
+        'Страница': window.location.href,
+        ...(utm.utm_source && { 'UTM Source': utm.utm_source }),
+        ...(utm.utm_medium && { 'UTM Medium': utm.utm_medium }),
+        ...(utm.utm_campaign && { 'UTM Campaign': utm.utm_campaign }),
       };
 
       const response = await fetch('https://api.web3forms.com/submit', {
@@ -73,10 +76,7 @@ export default function TestDriveForm({ onSuccess, preselectedModel }: TestDrive
       const result = await response.json();
 
       if (response.ok && result.success) {
-        if (typeof window !== 'undefined') {
-          if ((window as any).ym) { (window as any).ym(96344039, 'reachGoal', 'forma'); }
-          if ((window as any).ct) { (window as any).ct('goal', 'forma'); }
-        }
+        trackGoal('forma');
         setName(''); setPhone(''); setConsent(false);
         onSuccess();
       } else {

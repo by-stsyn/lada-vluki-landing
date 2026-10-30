@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Не перенаправляем существующие файлы и папки (включая cars.php, картинки, pdf)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Все остальные маршруты (например /car/...) отдаем через index.html (SPA)
+  RewriteRule ^ index.html [L]
+</IfModule>

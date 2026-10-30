@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { sendToCalltouch, getUtmParams, trackGoal } from './calltouch';
 
 interface ContactFormProps {
   leadType: 'general' | 'credit';
@@ -41,37 +42,34 @@ export default function ContactForm({ leadType, onSuccess, carModel }: ContactFo
     setLoading(true);
 
     try {
-      // 1. Отправка в Calltouch (Напрямую или через твой скрипт)
-      try {
-        const ctSiteId = '51665'; // Проверь, правильный ли ID для Лады
-        const calltouchUrl = `https://api.calltouch.ru/calls-service/RestAPI/requests/${ctSiteId}/register/`;
-        
-        const ctData = new URLSearchParams();
-        ctData.append('fio', name);
-        ctData.append('phoneNumber', phone.replace(/\D/g, ''));
-        ctData.append('subject', 'Заявка с сайта: LADA Великие Луки');
-        if (carModel) ctData.append('comment', `Модель: ${carModel} | Форма: ${leadType}`);
-        ctData.append('requestUrl', window.location.href);
-        
-        const sessionId = (window as any).call_value || (window as any).ct_local_session_id;
-        if (sessionId) ctData.append('sessionId', sessionId);
+      const formLabel = leadType === 'general' ? 'Бронирование / Консультация' : 'Кредит';
 
-        await fetch(calltouchUrl, { method: 'POST', body: ctData });
-      } catch (ctError) {
-        console.error('❌ Ошибка Calltouch:', ctError);
-      }
+      // 1. Отправка в Calltouch с подписью города Великие Луки и тегами
+      await sendToCalltouch({
+        fio: name,
+        phone,
+        subject: 'Заявка с сайта: LADA Великие Луки',
+        comment: `Форма: ${formLabel}${carModel ? ` | Модель: ${carModel}` : ' | Общая заявка'}`,
+        tags: carModel ? `Заявка,${carModel}` : 'Заявка',
+      });
 
-      // 2. Отправка в Web3Forms (Замена Supabase)
+      // 2. Отправка в Web3Forms
       const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || 'cf05b6d7-94ea-4763-afbc-9b5b7619a6a4';
+      const utm = getUtmParams();
       
       const formData = {
         access_key: accessKey,
         subject: '🚀 Новая заявка: LADA Великие Луки',
-        from_name: 'LADA Landing',
+        from_name: 'LADA Прагматика Великие Луки',
+        'Город': 'Великие Луки (Прагматика LADA)',
         'Имя клиента': name,
         'Телефон': phone,
-        'Форма': leadType === 'general' ? 'Бронирование / Узнать подробности' : 'Кредит',
+        'Форма': formLabel,
         ...(carModel && { 'Интересует авто': carModel }),
+        'Страница': window.location.href,
+        ...(utm.utm_source && { 'UTM Source': utm.utm_source }),
+        ...(utm.utm_medium && { 'UTM Medium': utm.utm_medium }),
+        ...(utm.utm_campaign && { 'UTM Campaign': utm.utm_campaign }),
       };
 
       const response = await fetch('https://api.web3forms.com/submit', {
@@ -85,13 +83,8 @@ export default function ContactForm({ leadType, onSuccess, carModel }: ContactFo
 
       const result = await response.json();
 
-      // Если Web3Forms ответил 200 OK
       if (response.ok && result.success) {
-        // Отстукиваем цели Яндекс.Метрики и Calltouch
-        if (typeof window !== 'undefined') {
-          if ((window as any).ym) { (window as any).ym(96344039, 'reachGoal', 'forma'); }
-          if ((window as any).ct) { (window as any).ct('goal', 'forma'); }
-        }
+        trackGoal('forma');
         setName(''); setPhone(''); setConsent(false);
         onSuccess();
       } else {

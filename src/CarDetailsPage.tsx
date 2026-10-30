@@ -4,6 +4,7 @@ import { fetchCars, type Car } from './api/carsApi';
 import CreditCalculator from './components/CreditCalculator';
 import TestDriveForm from './components/TestDriveForm';
 import ContactForm from './components/ContactForm';
+import { saveUtmParams, trackGoal } from './components/calltouch';
 
 export default function CarDetailsPage({ carId }: { carId: string }) {
   const [car, setCar] = useState<Car | null>(null);
@@ -12,7 +13,14 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
   const [showSuccess, setShowSuccess] = useState(false);
   const thumbnailsContainerRef = useRef<HTMLDivElement>(null);
 
+  const navigateHome = () => {
+    window.history.pushState({}, '', '/');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
   useEffect(() => {
+    window.scrollTo(0, 0);
+    saveUtmParams();
     fetchCars()
       .then((cars) => {
         const foundCar = cars.find((c) => c.id === carId || c.vin === carId);
@@ -23,7 +31,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
       })
       .catch(console.error)
       .finally(() => setLoading(false));
-  },[carId]);
+  }, [carId]);
 
   useEffect(() => {
     if (car && car.vin && carId !== car.vin) {
@@ -38,13 +46,9 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
         activeThumbnail.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       }
     }
-  },[activePhoto]);
+  }, [activePhoto]);
 
   const handleSuccess = () => {
-    if (typeof window !== 'undefined') {
-      if ((window as any).ym) { (window as any).ym(96344039, 'reachGoal', 'forma'); }
-      if ((window as any).ct) { (window as any).ct('goal', 'forma'); }
-    }
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 5000);
   };
@@ -80,7 +84,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
       <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center text-center px-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">Автомобиль не найден</h1>
         <p className="text-gray-500 mb-6">Возможно, он уже продан или ссылка устарела.</p>
-        <button onClick={() => window.location.href = '/'} className="bg-[#303c48] text-white px-8 py-3 rounded-xl font-semibold hover:bg-brand-orange transition shadow-md">
+        <button onClick={navigateHome} className="bg-[#303c48] text-white px-8 py-3 rounded-xl font-semibold hover:bg-brand-orange transition shadow-md">
           Вернуться в каталог
         </button>
       </div>
@@ -109,7 +113,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
       <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 shadow-sm flex-shrink-0">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
-            <button onClick={() => window.location.href = '/'} className="text-gray-600 hover:text-brand-orange transition flex items-center gap-2 font-semibold bg-gray-100 px-3 py-2 rounded-lg">
+            <button onClick={navigateHome} className="text-gray-600 hover:text-brand-orange transition flex items-center gap-2 font-semibold bg-gray-100 px-3 py-2 rounded-lg">
               <ArrowLeft className="w-5 h-5" />
               <span className="hidden sm:inline">В каталог</span>
             </button>
@@ -120,12 +124,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
           </div>
           <a 
             href="tel:+78115395565" 
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                if ((window as any).ym) { (window as any).ym(96344039, 'reachGoal', 'zvonok'); }
-                if ((window as any).ct) { (window as any).ct('goal', 'zvonok'); }
-              }
-            }}
+            onClick={() => trackGoal('zvonok')}
             className="flex items-center gap-2 text-sm font-bold text-gray-900 hover:text-brand-orange transition"
           >
             <Phone className="w-5 h-5" />
@@ -251,7 +250,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
             <p className="text-lg mb-2 font-semibold text-white">Прагматика LADA Великие Луки</p>
             <p className="mb-4">Официальный дилер LADA в Великих Луках</p>
             <p className="mb-4"><a href="/privacy.pdf" target="_blank" className="underline text-blue-500">Политика конфиденциальности</a></p>
-            <p className="mb-4"><a href="https://vlyki.pskov.lada.ru/?utm_source=yandex&utm_medium=cpc&utm_campaign=yandex_pr" target="_blank" className="underline text-blue-500">vlyki.pskov.lada.ru</a></p>
+            <p className="mb-4"><a href="https://vluki.lada.ru/?utm_source=yandex&utm_medium=cpc&utm_campaign=yandex_pr" target="_blank" className="underline text-blue-500">vluki.lada.ru</a></p>
             <p className="text-sm text-gray-400">Филиал ООО "Псков-Лада" Великие Луки. ИНН: 6027196721, КПП: 602543001</p>
             <p className="text-sm text-gray-400 mt-6">© 2026 Все права защищены</p>
           </div>

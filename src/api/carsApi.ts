@@ -26,13 +26,30 @@ export const fetchCars = async (): Promise<Car[]> => {
       }
     }
 
-    const res = await fetch("https://carsinstok.onrender.com/api/cars");
+    let data: any = null;
 
-    if (!res.ok) {
-      throw new Error(`Ошибка сети: ${res.status}`);
+    if (!import.meta.env.DEV) {
+      try {
+        const phpRes = await fetch("/cars.php");
+        if (phpRes.ok) {
+          const text = await phpRes.text();
+          const parsed = JSON.parse(text);
+          if (Array.isArray(parsed)) {
+            data = parsed;
+          }
+        }
+      } catch {
+        // Fallback to direct API if PHP proxy is not active in current environment
+      }
     }
 
-    const data = await res.json();
+    if (!data) {
+      const res = await fetch("https://carsinstok.onrender.com/api/cars");
+      if (!res.ok) {
+        throw new Error(`Ошибка сети: ${res.status}`);
+      }
+      data = await res.json();
+    }
 
     if (!Array.isArray(data)) {
       throw new Error("Получены некорректные данные от сервера");

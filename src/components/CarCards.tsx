@@ -45,9 +45,15 @@ export const CarCard = ({
       
       <div className="relative h-[250px] bg-gray-100 overflow-hidden flex-shrink-0">
         <img
-          src={car.photos?.[index] || "/no-image.jpg"}
+          src={car.photos?.[index] || "/promo-lada.webp"}
           alt={`${car.brand} ${car.model}`}
           loading="lazy"
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (!target.src.endsWith("/promo-lada.webp")) {
+              target.src = "/promo-lada.webp";
+            }
+          }}
           className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
         />
 
@@ -75,7 +81,6 @@ export const CarCard = ({
           <h3 className="text-xl font-bold text-gray-900 leading-tight">
             {car.brand} {car.model}
           </h3>
-          {/* ✅ ЦВЕТ ИЗМЕНЕН НА ОРАНЖЕВЫЙ */}
           <span className="flex-shrink-0 text-[10px] font-bold px-2 py-1 rounded-full bg-brand-orange text-white">
             В НАЛИЧИИ
           </span>
@@ -98,7 +103,11 @@ export const CarCard = ({
 
         <div className="flex flex-col gap-2 mt-auto">
           <button
-            onClick={() => window.location.href = `/car/${car.vin || car.id}`}
+            onClick={() => {
+              const targetUrl = `/car/${car.vin || car.id}`;
+              window.history.pushState({}, '', targetUrl);
+              window.dispatchEvent(new PopStateEvent('popstate'));
+            }}
             className="w-full bg-brand-orange text-white py-3 rounded-xl font-semibold hover:bg-orange-600 transition shadow-md"
           >
             Подробнее
