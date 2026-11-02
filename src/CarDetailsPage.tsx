@@ -40,10 +40,14 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
   }, [car, carId]);
 
   useEffect(() => {
-    if (thumbnailsContainerRef.current && activePhoto) {
-      const activeThumbnail = thumbnailsContainerRef.current.querySelector(`[data-photo-url="${activePhoto}"]`);
+    const container = thumbnailsContainerRef.current;
+    if (container && activePhoto) {
+      const buttons = Array.from(container.querySelectorAll('button'));
+      const activeThumbnail = buttons.find((btn) => btn.getAttribute('data-photo-url') === activePhoto);
       if (activeThumbnail) {
-        activeThumbnail.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        const scrollLeft =
+          activeThumbnail.offsetLeft - container.clientWidth / 2 + activeThumbnail.clientWidth / 2;
+        container.scrollTo({ left: Math.max(0, scrollLeft), behavior: 'smooth' });
       }
     }
   }, [activePhoto]);
@@ -69,6 +73,13 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
     const currentIndex = car.photos.indexOf(activePhoto);
     const prevIndex = (currentIndex - 1 + car.photos.length) % car.photos.length;
     setActivePhoto(car.photos[prevIndex]);
+  };
+
+  const handleImgError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.currentTarget;
+    if (!target.src.endsWith('/promo-lada.webp')) {
+      target.src = '/promo-lada.webp';
+    }
   };
 
   if (loading) {
@@ -151,18 +162,18 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
               {car.photos && car.photos.length > 0 ? (
                 <>
                   <div className="relative group h-[300px] sm:h-[400px] md:h-[500px] bg-gray-100 rounded-2xl overflow-hidden mb-4">
-                    <img src={activePhoto} alt={baseCarName} loading="lazy" className="w-full h-full object-cover" />
+                    <img src={activePhoto} alt={baseCarName} loading="lazy" onError={handleImgError} className="w-full h-full object-cover" />
                     {car.photos.length > 1 && (
                       <>
-                        <button onClick={prevPhoto} className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 text-white w-12 h-12 rounded-full hover:bg-black/60 transition opacity-0 group-hover:opacity-100 flex items-center justify-center"><ChevronLeft className="w-7 h-7" /></button>
-                        <button onClick={nextPhoto} className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 text-white w-12 h-12 rounded-full hover:bg-black/60 transition opacity-0 group-hover:opacity-100 flex items-center justify-center"><ChevronRight className="w-7 h-7" /></button>
+                        <button onClick={prevPhoto} className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 text-white w-12 h-12 rounded-full hover:bg-black/60 transition opacity-80 lg:opacity-0 lg:group-hover:opacity-100 flex items-center justify-center"><ChevronLeft className="w-7 h-7" /></button>
+                        <button onClick={nextPhoto} className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 text-white w-12 h-12 rounded-full hover:bg-black/60 transition opacity-80 lg:opacity-0 lg:group-hover:opacity-100 flex items-center justify-center"><ChevronRight className="w-7 h-7" /></button>
                       </>
                     )}
                   </div>
                   <div ref={thumbnailsContainerRef} className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                     {car.photos.map((photo) => (
                       <button key={photo} data-photo-url={photo} onClick={() => setActivePhoto(photo)} className={`flex-shrink-0 w-24 h-20 md:w-32 md:h-24 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-gray-100 ${activePhoto === photo ? 'border-brand-orange ring-4 ring-orange-500/20' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                        <img src={photo} alt="" loading="lazy" className="w-full h-full object-cover" /> 
+                        <img src={photo} alt="" loading="lazy" onError={handleImgError} className="w-full h-full object-cover" /> 
                       </button>
                     ))}
                   </div>
@@ -203,7 +214,6 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
               <div className="border-t border-gray-200 pt-6">
                 <h4 className="font-bold text-xl text-gray-900 mb-2">Забронировать автомобиль</h4>
                 <p className="text-sm text-gray-500 mb-6">Оставьте заявку, чтобы зафиксировать цену. Это вас ни к чему не обязывает.</p>
-                {/* Исправлена передача названия авто */}
                 <ContactForm leadType="general" onSuccess={handleSuccess} carModel={fullCarName} />
               </div>
             </div>
@@ -214,7 +224,6 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
           <div>
             <div className="text-center mb-8"><h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-3">Кредит от 0.01%</h2><p className="text-lg text-gray-500">Рассчитайте комфортный платеж на этот {car.model}</p></div>
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-100 p-6 md:p-10 max-w-5xl mx-auto">
-              {/* Добавлена передача цены и названия в калькулятор (если он это поддерживает) */}
               <CreditCalculator onSuccess={handleSuccess} carPrice={finalPrice} carModel={fullCarName} />
             </div>
           </div>
@@ -228,7 +237,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
                   Записаться на тест-драйв
                 </button>
               </div>
-              <div className="h-64 lg:h-full order-1 lg:order-2"><img src={car.photos?.[1] || car.photos?.[0] || '/promo-lada.webp'} alt={`Тест-драйв ${baseCarName}`} loading="lazy" className="w-full h-full object-cover" /></div>
+              <div className="h-64 lg:h-full order-1 lg:order-2"><img src={car.photos?.[1] || car.photos?.[0] || '/promo-lada.webp'} alt={`Тест-драйв ${baseCarName}`} loading="lazy" onError={handleImgError} className="w-full h-full object-cover" /></div>
             </div>
           </div>
 

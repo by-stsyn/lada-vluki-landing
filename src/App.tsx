@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Phone, MapPin, Mail, Menu, X, RefreshCw, TrendingUp } from 'lucide-react';
+import { Phone, MapPin, Clock, Menu, X, RefreshCw, TrendingUp } from 'lucide-react';
 import Modal from './components/Modal';
 import ContactForm from './components/ContactForm';
 import TestDriveForm from './components/TestDriveForm';
@@ -240,7 +240,19 @@ function App() {
                       <div className="inline-block bg-[#f7761f] text-white px-5 py-2 rounded-full text-sm font-bold mb-5 shadow-md">
                         {car.badge}
                       </div>
-                      <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">{car.name}</h3>
+                      <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">{car.name}</h3>
+                      {car.specs && car.specs.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mb-6">
+                          {car.specs.map((spec, sIdx) => (
+                            <span
+                              key={sIdx}
+                              className="bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold px-3 py-1 rounded-lg border border-gray-200"
+                            >
+                              {spec}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       <div className="bg-gradient-to-br from-[#303c48] to-[#f7761f] text-white rounded-2xl p-6 mb-6 shadow-lg">
                         <div className="text-2xl font-bold mb-4 flex items-center gap-2">
                           <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -600,7 +612,7 @@ function App() {
 
                 <div className="flex gap-4">
                   <div className="bg-[#f7761f] rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0">
-                    <Mail className="w-6 h-6 text-white" />
+                    <Clock className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h4 className="font-bold text-lg text-gray-900 mb-2">РЕЖИМ РАБОТЫ</h4>

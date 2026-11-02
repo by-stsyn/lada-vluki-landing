@@ -61,13 +61,13 @@ export const CarCard = ({
           <>
             <button
               onClick={prev}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 text-white w-9 h-9 rounded-full hover:bg-black/60 flex items-center justify-center pb-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 text-white w-9 h-9 rounded-full hover:bg-black/60 flex items-center justify-center pb-1 opacity-80 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
             >
               ‹
             </button>
             <button
               onClick={next}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 text-white w-9 h-9 rounded-full hover:bg-black/60 flex items-center justify-center pb-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 bg-black/40 text-white w-9 h-9 rounded-full hover:bg-black/60 flex items-center justify-center pb-1 opacity-80 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
             >
               ›
             </button>

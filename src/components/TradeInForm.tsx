@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { sendToCalltouch, getUtmParams, trackGoal } from './calltouch';
+import { sendToCalltouch, getUtmParams, trackGoal, formatPhoneInput } from './calltouch';
 
 interface TradeInFormProps {
   onSuccess: () => void;
@@ -18,18 +18,7 @@ export default function TradeInForm({ onSuccess }: TradeInFormProps) {
   const isPhoneValid = phone.length === 18;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let val = e.target.value.replace(/\D/g, '');
-    if (!val) { setPhone(''); return; }
-    if (['7', '8', '9'].includes(val[0])) {
-      if (val[0] === '9') val = '7' + val;
-      else val = '7' + val.substring(1);
-    } else { val = '7' + val; }
-    let formatted = '+7';
-    if (val.length > 1) formatted += ' (' + val.substring(1, 4);
-    if (val.length > 4) formatted += ') ' + val.substring(4, 7);
-    if (val.length > 7) formatted += '-' + val.substring(7, 9);
-    if (val.length > 9) formatted += '-' + val.substring(9, 11);
-    setPhone(formatted);
+    setPhone(formatPhoneInput(e.target.value));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

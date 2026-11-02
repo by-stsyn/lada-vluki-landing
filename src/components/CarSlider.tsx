@@ -23,23 +23,23 @@ export default function CarSlider({ images, carName }: CarSliderProps) {
 
   return (
     <div className="relative">
-      <div className="relative h-96 bg-gray-100 rounded-lg overflow-hidden group">
+      <div className="relative h-64 sm:h-80 lg:h-96 bg-gray-100 rounded-lg overflow-hidden group">
         <img
           src={images[currentIndex]}
           alt={`${carName} - ${currentIndex + 1}`}
-          className="w-full h-auto lg:h-96 lg:object-cover object-contain rounded-lg"
+          className="w-full h-full object-cover rounded-lg"
         />
 
         <button
           onClick={goToPrevious}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg opacity-80 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
         >
           <ChevronLeft className="w-6 h-6 text-gray-900" />
         </button>
 
         <button
           onClick={goToNext}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full p-2 shadow-lg opacity-80 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity"
         >
           <ChevronRight className="w-6 h-6 text-gray-900" />
         </button>

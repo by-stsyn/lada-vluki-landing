@@ -9,6 +9,30 @@ declare global {
 
 const UTM_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'] as const;
 
+export const formatPhoneInput = (rawValue: string): string => {
+  let val = rawValue.replace(/\D/g, '');
+  if (!val) return '';
+
+  // Handle paste/autofill of 11-digit number (+7... or 8...) into an input that already had "+7"
+  if (val.length >= 12 && (val.startsWith('77') || val.startsWith('78'))) {
+    val = val.substring(1);
+  }
+
+  if (['7', '8', '9'].includes(val[0])) {
+    if (val[0] === '9') val = '7' + val;
+    else val = '7' + val.substring(1);
+  } else {
+    val = '7' + val;
+  }
+
+  let formatted = '+7';
+  if (val.length > 1) formatted += ' (' + val.substring(1, 4);
+  if (val.length > 4) formatted += ') ' + val.substring(4, 7);
+  if (val.length > 7) formatted += '-' + val.substring(7, 9);
+  if (val.length > 9) formatted += '-' + val.substring(9, 11);
+  return formatted;
+};
+
 export const saveUtmParams = () => {
   if (typeof window === 'undefined') return;
   try {
