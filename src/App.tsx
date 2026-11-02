@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Phone, MapPin, Clock, Menu, X, RefreshCw, TrendingUp } from 'lucide-react';
+import { Phone, MapPin, Clock, Menu, X, RefreshCw, TrendingUp, ChevronDown, Check, Sparkles, Car as CarIcon, Calendar } from 'lucide-react';
 import Modal from './components/Modal';
 import ContactForm from './components/ContactForm';
 import TestDriveForm from './components/TestDriveForm';
@@ -33,7 +33,26 @@ function App() {
     setModalType('contact');
   };
   
+  const [activeCategory, setActiveCategory] = useState<'all' | 'sedan' | 'cross' | 'suv' | 'wagon'>('all');
+  const [expandedSpecsId, setExpandedSpecsId] = useState<string | null>(null);
+  const [stockFilterRequest, setStockFilterRequest] = useState<{ model: string; timestamp: number } | null>(null);
+
+  const handleViewModelInStock = (modelName: string) => {
+    setStockFilterRequest({ model: modelName, timestamp: Date.now() });
+    scrollToSection('stock');
+  };
+
   const scrollToSection = (id: string) => {
+    const isCarModel = carModels.some((m) => m.id === id);
+    if (isCarModel && activeCategory !== 'all') {
+      setActiveCategory('all');
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 50);
+      setMobileMenuOpen(false);
+      return;
+    }
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -42,84 +61,238 @@ function App() {
   };
 
   const carModels = [
-    { name: 'Granta', id: 'granta', price: 'от 680 000 ₽' },
-    { name: 'Granta Cross', id: 'granta-cross', price: 'от 912 000 ₽' },
-    { name: 'Vesta', id: 'vesta', price: 'от 1 222 400 ₽' },
-    { name: 'Vesta Cross', id: 'vesta-cross', price: 'от 1 552 800 ₽' },
-    { name: 'Largus', id: 'largus', price: 'от 1 461 000 ₽' },
-    { name: 'Iskra', id: 'iskra', price: 'от 1 093 600 ₽' },
-    { name: 'Niva Legend', id: 'niva-legend', price: 'от 868 000 ₽' },
-    { name: 'Niva Travel', id: 'niva-travel', price: 'от 1 282 400 ₽' },
+    { name: 'Granta', id: 'granta' },
+    { name: 'Granta Cross', id: 'granta-cross' },
+    { name: 'Vesta', id: 'vesta' },
+    { name: 'Vesta Cross', id: 'vesta-cross' },
+    { name: 'Largus', id: 'largus' },
+    { name: 'Iskra', id: 'iskra' },
+    { name: 'Niva Legend', id: 'niva-legend' },
+    { name: 'Niva Travel', id: 'niva-travel' },
   ];
 
-  const heroSlides = [
+  const categories = [
+    { id: 'all' as const, label: 'Все модели' },
+    { id: 'sedan' as const, label: 'Седаны' },
+    { id: 'cross' as const, label: 'Кросс-версии' },
+    { id: 'suv' as const, label: 'Внедорожники 4×4' },
+    { id: 'wagon' as const, label: 'Универсалы' },
+  ];
+
+  const cars = [
     {
       id: 'granta',
-      tabLabel: '01. LADA Granta',
-      kicker: 'Официальный дилер LADA в Великих Луках',
-      title: 'Купи LADA Granta с выгодой до 300 000 ₽ и подарками от Прагматика',
-      subtitle: 'Госпрограмма до -20%, дополнительное оборудование до 100 000 ₽ или антикор в подарок на выбор, а также полный бак бензина иногородним.',
-      priceTag: 'от 680 000 ₽',
-      benefitTag: 'Выгода до 300 000 ₽',
-      image: '/promo-lada.webp',
-      carName: 'LADA Granta',
+      name: 'Granta',
+      category: 'sedan' as const,
+      badge: 'ХИТ ПРОДАЖ',
+      price: 'от 680 000 ₽',
+      monthlyPayment: 'от 6 900 ₽/мес.',
+      benefit: 'Выгода до 300 000 ₽',
+      images: ['/lada/granta-1.jpg', '/lada/granta-2.jpg', '/lada/granta-3.jpg', '/lada/granta-4.jpg'],
+      specs: ['Седан', '1.6 л / 90 л.с.', '5МТ / АМТ', 'Передний привод'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '180 мм' },
+        { label: 'Расход', value: '6.8 л / 100 км' },
+        { label: 'Багажник', value: '520–815 л' },
+        { label: 'Разгон 0–100', value: '11.2 с' },
+      ],
+      features: [
+        'Габариты: 4268×1700×1500 мм',
+        'Колёсная база: 2476 мм',
+        'Дорожный просвет: 180 мм',
+        'Разгон до 100 км/ч: 11.2 с',
+        'Макс. скорость: 179 км/ч',
+        'Расход: 6.8 л/100 км (смешанный)',
+        'Багажник: 520-815 л',
+      ],
     },
     {
-      id: 'iskra',
-      tabLabel: '02. Новая Iskra',
-      kicker: 'Долгожданная новинка в наличии',
-      title: 'Новая LADA Iskra с выгодой до 350 000 ₽ в Великих Луках',
-      subtitle: 'Выразительный дизайн, дорожный просвет 170 мм и современные технологии комфорта. Испытайте новинку на бесплатном тест-драйве.',
-      priceTag: 'от 1 093 600 ₽',
-      benefitTag: 'Выгода до 350 000 ₽',
-      image: '/lada/iskra-1.jpg',
-      carName: 'LADA Iskra',
+      id: 'granta-cross',
+      name: 'Granta Cross',
+      category: 'cross' as const,
+      badge: 'КРОСС-УНИВЕРСАЛ',
+      price: 'от 912 000 ₽',
+      monthlyPayment: 'от 9 300 ₽/мес.',
+      benefit: 'Выгода до 300 000 ₽',
+      images: ['/lada/granta-cross-1.jpg', '/lada/granta-cross-2.jpg', '/lada/granta-cross-3.jpg', '/lada/granta-cross-4.jpg'],
+      specs: ['Универсал Cross', '1.6 л / 98 л.с.', '5МТ', 'Передний привод'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '198 мм' },
+        { label: 'Расход', value: '6.8 л / 100 км' },
+        { label: 'Багажник', value: '355–670 л' },
+        { label: 'Разгон 0–100', value: '11.2 с' },
+      ],
+      features: [
+        'Габариты: 4148×1700×1560 мм',
+        'Колёсная база: 2476 мм',
+        'Дорожный просвет: 198 мм',
+        'Разгон до 100 км/ч: 11.2 с',
+        'Макс. скорость: 172 км/ч',
+        'Расход: 6.8 л/100 км (смешанный)',
+        'Багажник: 355-670 л',
+      ],
     },
     {
       id: 'vesta',
-      tabLabel: '03. Семейство Vesta',
-      kicker: 'Флагман модельного ряда LADA',
-      title: 'LADA Vesta и Vesta Cross с выгодой от 520 000 ₽',
-      subtitle: 'Просторный салон, энергоемкая подвеска и специальные условия обмена по программе Trade-In с дополнительной скидкой до 130 000 ₽.',
-      priceTag: 'от 1 222 400 ₽',
-      benefitTag: 'Выгода от 520 000 ₽',
-      image: '/lada/vesta-cross-1.jpg',
-      carName: 'LADA Vesta',
+      name: 'Vesta',
+      category: 'sedan' as const,
+      badge: 'ФЛАГМАН',
+      price: 'от 1 222 400 ₽',
+      monthlyPayment: 'от 12 400 ₽/мес.',
+      benefit: 'Выгода от 520 000 ₽',
+      images: ['/lada/vesta-1.jpg', '/lada/vesta-2.jpg', '/lada/vesta-3.jpg', '/lada/vesta-4.jpg'],
+      specs: ['Седан', '1.6–1.8 л / 106–122 л.с.', '5МТ / АТ', 'Передний привод'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '171 мм' },
+        { label: 'Расход', value: '7.3 л / 100 км' },
+        { label: 'Багажник', value: '480 л' },
+        { label: 'Разгон 0–100', value: '11.3 с' },
+      ],
+      features: [
+        'Габариты: 4440×1764×1496 мм',
+        'Колёсная база: 2635 мм',
+        'Дорожный просвет: 171 мм',
+        'Разгон до 100 км/ч: 11.3 с',
+        'Макс. скорость: 182 км/ч',
+        'Расход: 7.3 л/100 км (смешанный)',
+        'Багажник: 480 л',
+      ],
+    },
+    {
+      id: 'vesta-cross',
+      name: 'Vesta Cross',
+      category: 'cross' as const,
+      badge: 'КРОСС-ВЕРСИЯ',
+      price: 'от 1 552 800 ₽',
+      monthlyPayment: 'от 15 800 ₽/мес.',
+      benefit: 'Выгода до 480 000 ₽',
+      images: ['/lada/vesta-cross-1.jpg', '/lada/vesta-cross-2.jpg', '/lada/vesta-cross-3.jpg', '/lada/vesta-cross-4.jpg'],
+      specs: ['Универсал Cross', '1.6–1.8 л / 106–122 л.с.', '5МТ / АМТ', 'Передний привод'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '203 мм' },
+        { label: 'Расход', value: '7.5 л / 100 км' },
+        { label: 'Багажник', value: '480–825 л' },
+        { label: 'Разгон 0–100', value: '12.6 с' },
+      ],
+      features: [
+        'Габариты: 4445×1785×1522 мм',
+        'Колёсная база: 2635 мм',
+        'Дорожный просвет: 203 мм',
+        'Разгон до 100 км/ч: 12.6 с',
+        'Макс. скорость: 178 км/ч',
+        'Расход: 7.5 л/100 км (смешанный)',
+        'Багажник: 480-825 л',
+      ],
+    },
+    {
+      id: 'largus',
+      name: 'Largus',
+      category: 'wagon' as const,
+      badge: 'СЕМЕЙНЫЙ',
+      price: 'от 1 461 000 ₽',
+      monthlyPayment: 'от 14 900 ₽/мес.',
+      benefit: 'Выгода от 530 000 ₽',
+      images: ['/lada/largus-1.jpg', '/lada/largus-2.jpg', '/lada/largus-3.jpg', '/lada/largus-4.jpg'],
+      specs: ['Универсал / Фургон', '1.6 л / 90–106 л.с.', '5МТ', 'Передний привод'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '172 мм' },
+        { label: 'Расход', value: '7.5 л / 100 км' },
+        { label: 'Багажник', value: '560–2350 л' },
+        { label: 'Колёсная база', value: '2905 мм' },
+      ],
+      features: [
+        'Габариты: 4488×1735×1628 мм',
+        'Колёсная база: 2905 мм',
+        'Дорожный просвет: 172 мм',
+        'Разгон до 100 км/ч: 13.5-14 с',
+        'Макс. скорость: 160 км/ч',
+        'Расход: 7.5-7.8 л/100 км (смешанный)',
+        'Багажник: 560 л',
+      ],
+    },
+    {
+      id: 'iskra',
+      name: 'Iskra',
+      category: 'sedan' as const,
+      badge: 'НОВИНКА',
+      price: 'от 1 093 600 ₽',
+      monthlyPayment: 'от 11 100 ₽/мес.',
+      benefit: 'Выгода до 350 000 ₽',
+      images: ['/lada/iskra-1.jpg', '/lada/iskra-2.jpg', '/lada/iskra-cross-3.jpeg', '/lada/iskra-cross-4.jpeg'],
+      specs: ['Седан / SW Cross', '1.6 л / 90–106 л.с.', '5МТ / 6МТ / АТ', 'Передний привод'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '170 мм' },
+        { label: 'Расход', value: '7.8 л / 100 км' },
+        { label: 'Багажник', value: '500 л' },
+        { label: 'Разгон 0–100', value: '12.3 с' },
+      ],
+      features: [
+        'Габариты: 4333×1777×1517 мм',
+        'Колёсная база: 2603 мм',
+        'Дорожный просвет: 170 мм',
+        'Разгон до 100 км/ч: 12.3 с',
+        'Макс. скорость: 177 км/ч',
+        'Расход: 7.8 л/100 км (смешанный)',
+        'Багажник: 500 л (седан), 480 л (универсал)',
+      ],
+    },
+    {
+      id: 'niva-legend',
+      name: 'Niva Legend',
+      category: 'suv' as const,
+      badge: 'ПОЛНЫЙ ПРИВОД 4×4',
+      price: 'от 868 000 ₽',
+      monthlyPayment: 'от 8 800 ₽/мес.',
+      benefit: 'Выгода до 350 000 ₽',
+      images: ['/lada/niva-legend-1.jpg', '/lada/niva-legend-2.jpg', '/lada/niva-legend-3.jpg', '/lada/niva-legend-4.jpg'],
+      specs: ['Внедорожник', '1.7 л / 83 л.с.', '5МТ', 'Полный привод 4×4'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '200 мм' },
+        { label: 'Привод', value: 'Постоянный 4×4' },
+        { label: 'Багажник', value: '265–585 л' },
+        { label: 'Расход', value: '9.9 л / 100 км' },
+      ],
+      features: [
+        'Габариты: 3740×1680×1640 мм',
+        'Колёсная база: 2200 мм',
+        'Дорожный просвет: 200 мм',
+        'Разгон до 100 км/ч: 17 с',
+        'Макс. скорость: 142 км/ч',
+        'Расход: 9.9 л/100 км (смешанный)',
+        'Багажник: 265-585 л',
+      ],
     },
     {
       id: 'niva-travel',
-      tabLabel: '04. Внедорожники Niva 4×4',
-      kicker: 'Легендарный полный привод',
-      title: 'LADA Niva Travel и Niva Legend с выгодой до 360 000 ₽',
-      subtitle: 'Честный постоянный полный привод 4×4 и клиренс до 220 мм для любых дорог. Автомобили с ПТС в наличии в дилерском центре.',
-      priceTag: 'от 868 000 ₽',
-      benefitTag: 'Выгода до 360 000 ₽',
-      image: '/lada/niva-travel-1.jpg',
-      carName: 'LADA Niva',
+      name: 'Niva Travel',
+      category: 'suv' as const,
+      badge: 'ВНЕДОРОЖНИК 4×4',
+      price: 'от 1 282 400 ₽',
+      monthlyPayment: 'от 13 100 ₽/мес.',
+      benefit: 'Выгода до 360 000 ₽',
+      images: ['/lada/niva-travel-1.jpg', '/lada/niva-travel-2.jpg', '/lada/niva-travel-3.jpg', '/lada/niva-travel-4.jpg'],
+      specs: ['Внедорожник', '1.8 л / 90 л.с.', '5МТ', 'Полный привод 4×4'],
+      keyMetrics: [
+        { label: 'Клиренс', value: '220 мм' },
+        { label: 'Привод', value: 'Постоянный 4×4' },
+        { label: 'Багажник', value: '320–650 л' },
+        { label: 'Расход', value: '10.2 л / 100 км' },
+      ],
+      features: [
+        'Габариты: 4099×1804×1690 мм',
+        'Колёсная база: 2450 мм',
+        'Дорожный просвет: 220 мм',
+        'Разгон до 100 км/ч: 19 с',
+        'Макс. скорость: 140 км/ч',
+        'Расход: 10.2 л/100 км (смешанный)',
+        'Багажник: 320-650 л',
+      ],
     },
   ];
 
-  const [activeSlide, setActiveSlide] = useState(0);
-  const [heroPaused, setHeroPaused] = useState(false);
-
-  useEffect(() => {
-    if (heroPaused) return;
-    const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 6500);
-    return () => clearInterval(timer);
-  }, [heroPaused, heroSlides.length]);
-
-  const cars = [
-    { id: 'granta', name: 'Granta', badge: 'ХИТ ПРОДАЖ', price: 'от 680 000 ₽', benefit: 'Выгода до 300 000 ₽', images: ['/lada/granta-1.jpg', '/lada/granta-2.jpg', '/lada/granta-3.jpg', '/lada/granta-4.jpg'], specs: ['Седан', '1.6 л / 90 л.с.', '5МТ/АМТ', 'Передний привод'], features: ['Габариты: 4268×1700×1500 мм', 'Колёсная база: 2476 мм', 'Дорожный просвет: 180 мм', 'Разгон до 100 км/ч: 11.2 с', 'Макс. скорость: 179 км/ч', 'Расход: 6.8 л/100 км (смешанный)', 'Багажник: 520-815 л',], },
-    { id: 'granta-cross', name: 'Granta Cross', badge: 'БЕЗДОРОЖЬЕ', price: 'от 912 000 ₽', benefit: 'Выгода до 300 000 ₽', images: ['/lada/granta-cross-1.jpg', '/lada/granta-cross-2.jpg', '/lada/granta-cross-3.jpg', '/lada/granta-cross-4.jpg'], specs: ['Универсал', '1.6 л / 98 л.с.', '5МТ', 'Передний привод'], features: ['Габариты: 4148×1700×1560 мм', 'Колёсная база: 2476 мм', 'Дорожный просвет: 198 мм', 'Разгон до 100 км/ч: 11.2 с', 'Макс. скорость: 172 км/ч', 'Расход: 6.8 л/100 км (смешанный)', 'Багажник: 355-670 л',], },
-    { id: 'vesta', name: 'Vesta', badge: 'ПОПУЛЯРНАЯ', price: 'от 1 222 400 ₽', benefit: 'Выгода от 520 000 ₽', images: ['/lada/vesta-1.jpg', '/lada/vesta-2.jpg', '/lada/vesta-3.jpg', '/lada/vesta-4.jpg'], specs: ['Седан', '1.6-1.8 л / 106-122 л.с.', '5МТ', 'Передний привод'], features: ['Габариты: 4440×1764×1496 мм', 'Колёсная база: 2635 мм', 'Дорожный просвет: 171 мм', 'Разгон до 100 км/ч: 11.3 с', 'Макс. скорость: 182 км/ч', 'Расход: 7.3 л/100 км (смешанный)', 'Багажник: 480 л',], },
-    { id: 'vesta-cross', name: 'Vesta Cross', badge: 'БЕЗДОРОЖЬЕ', price: 'от 1 552 800 ₽', benefit: 'Выгода до 480 000 ₽', images: ['/lada/vesta-cross-1.jpg', '/lada/vesta-cross-2.jpg', '/lada/vesta-cross-3.jpg', '/lada/vesta-cross-4.jpg'], specs: ['Универсал', '1.6-1.8 л / 106-122 л.с.', '5МТ/АМТ', 'Передний привод'], features: ['Габариты: 4445×1785×1522 мм', 'Колёсная база: 2635 мм', 'Дорожный просвет: 203 мм', 'Разгон до 100 км/ч: 12.6 с', 'Макс. скорость: 178 км/ч', 'Расход: 7.5 л/100 км (смешанный)', 'Багажник: 480-825 л',], },
-    { id: 'largus', name: 'Largus', badge: 'СЕМЕЙНЫЙ', price: 'от 1 461 000 ₽', benefit: 'Выгода от 530 000 ₽', images: ['/lada/largus-1.jpg', '/lada/largus-2.jpg', '/lada/largus-3.jpg', '/lada/largus-4.jpg'], specs: ['Универсал/Фургон', '1.6 л / 90-106 л.с.', '5МТ', 'Передний привод'], features: ['Габариты: 4488×1735×1628 мм', 'Колёсная база: 2905 мм', 'Дорожный просвет: 172 мм', 'Разгон до 100 км/ч: 13.5-14 с', 'Макс. скорость: 160 км/ч', 'Расход: 7.5-7.8 л/100 км (смешанный)', 'Багажник: 560 л',], },
-    { id: 'iskra', name: 'Iskra', badge: 'НОВИНКА', price: 'от 1 093 600 ₽', benefit: 'Выгода до 350 000 ₽', images: ['/lada/iskra-1.jpg', '/lada/iskra-2.jpg', '/lada/iskra-cross-3.jpeg', '/lada/iskra-cross-4.jpeg'], specs: ['Седан', '1.6 л / 90-106 л.с.', '5МТ/6МТ/ВТ', 'Передний привод'], features: ['Габариты: 4333×1777×1517 мм', 'Колёсная база: 2603 мм', 'Дорожный просвет: 170 мм', 'Разгон до 100 км/ч: 12.3 с', 'Макс. скорость: 177 км/ч', 'Расход: 7.8 л/100 км (смешанный)', 'Багажник: 500 л (седан), 480 л (универсал)',], },
-    { id: 'niva-legend', name: 'Niva Legend', badge: 'ЛЕГЕНДА', price: 'от 868 000 ₽', benefit: 'Выгода до 350 000 ₽', images: ['/lada/niva-legend-1.jpg', '/lada/niva-legend-2.jpg', '/lada/niva-legend-3.jpg', '/lada/niva-legend-4.jpg'], specs: ['Внедорожник', '1.7 л / 83 л.с.', '5МТ', 'Полный привод 4x4'], features: ['Габариты: 3740×1680×1640 мм', 'Колёсная база: 2200 мм', 'Дорожный просвет: 200 мм', 'Разгон до 100 км/ч: 17 с', 'Макс. скорость: 142 км/ч', 'Расход: 9.9 л/100 км (смешанный)', 'Багажник: 265-585 л',], },
-    { id: 'niva-travel', name: 'Niva Travel', badge: 'ПРИКЛЮЧЕНИЯ', price: 'от 1 282 400 ₽', benefit: 'Выгода до 360 000 ₽', images: ['/lada/niva-travel-1.jpg', '/lada/niva-travel-2.jpg', '/lada/niva-travel-3.jpg', '/lada/niva-travel-4.jpg'], specs: ['Внедорожник', '1.8 л / 90 л.с.', '5МТ', 'Полный привод 4x4'], features: ['Габариты: 4099×1804×1690 мм', 'Колёсная база: 2450 мм', 'Дорожный просвет: 220 мм', 'Разгон до 100 км/ч: 19 с', 'Макс. скорость: 140 км/ч', 'Расход: 10.2 л/100 км (смешанный)', 'Багажник: 320-650 л',], },
-  ];
+  const filteredCars = activeCategory === 'all'
+    ? cars
+    : cars.filter((car) => car.category === activeCategory);
 
   const handleSuccess = () => {
     setModalType(null);
@@ -151,8 +324,6 @@ function App() {
     return <CarDetailsPage carId={carId} />;
   }
 
-  const currentHero = heroSlides[activeSlide];
-  
   return (
     <div className="min-h-screen bg-white">
       {/* Фирменная шапка в стиле официального дилера LADA (lada.ru) */}
@@ -300,282 +471,294 @@ function App() {
         </div>
       </header>
 
-      {/* Главный Hero-блок в фирменном стиле LADA (lada.ru) */}
-      <section
-        id="hero"
-        onMouseEnter={() => setHeroPaused(true)}
-        onMouseLeave={() => setHeroPaused(false)}
-        className="relative bg-[#182026] text-white overflow-hidden"
-      >
-        {/* Фоновое изображение активного слайда с выверенным градиентным сведением */}
+      {/* Сдержанный Hero-блок в фирменном стиле LADA */}
+      <section id="hero" className="relative bg-[#182026] text-white overflow-hidden">
         <div className="absolute inset-0">
           <img
-            key={currentHero.image}
-            src={currentHero.image}
-            alt={currentHero.carName}
-            className="w-full h-full object-cover object-center transition-opacity duration-500"
+            src="/promo-lada.webp"
+            alt="Модельный ряд LADA"
+            className="w-full h-full object-cover object-center"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#141b21]/95 via-[#182026]/80 to-[#182026]/20" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#141b21] via-transparent to-black/25" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#182026]/95 via-[#182026]/80 to-[#182026]/10" />
         </div>
 
-        {/* Основной контент Hero */}
-        <div className="container mx-auto px-4 pt-10 pb-8 lg:pt-16 lg:pb-12 relative z-10">
-          <div className="max-w-3xl">
-            {/* Кикер в стиле брендбука LADA */}
-            <div className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold tracking-wider uppercase text-[#ff6700] mb-4">
-              <span>{currentHero.kicker}</span>
-              <span aria-hidden="true" className="text-white/40">·</span>
-              <span className="text-white/90">{currentHero.benefitTag}</span>
+        <div className="container mx-auto px-4 py-14 sm:py-20 lg:py-24 relative z-10">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-300 mb-4">
+              <span className="w-2 h-2 rounded-full bg-[#ff6700]" />
+              <span>Официальный дилер LADA в Великих Луках</span>
             </div>
 
-            {/* Главный заголовок */}
-            <h1
-              className="text-3xl sm:text-4xl lg:text-[46px] font-extrabold leading-[1.12] tracking-tight text-white mb-4"
-              style={{ textWrap: 'balance' } as React.CSSProperties}
-            >
-              {currentHero.title}
+            <h1 className="text-3xl sm:text-5xl lg:text-[52px] font-extrabold leading-[1.1] tracking-tight text-white mb-4">
+              Новая LADA от <span className="text-[#ff6700]">680 000 ₽</span>
             </h1>
 
-            {/* Подзаголовок */}
-            <p className="text-sm sm:text-base lg:text-lg text-gray-200 max-w-2xl mb-7 leading-relaxed">
-              {currentHero.subtitle}
+            <p className="text-lg sm:text-xl text-gray-200 font-medium mb-7">
+              Специальные условия покупки в дилерском центре «Прагматика»:
             </p>
 
-            {/* Ключевые условия дилерского центра (4 архитектурных блока без лишних рамок) */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-8 max-w-2xl">
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-xl p-3.5">
-                <div className="text-xs text-gray-300 mb-0.5">Цена модели</div>
-                <div className="text-base sm:text-lg font-extrabold text-white tabular-nums">
-                  {currentHero.priceTag}
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-xl p-3.5">
-                <div className="text-xs text-gray-300 mb-0.5">Госпрограмма</div>
-                <div className="text-base sm:text-lg font-extrabold text-[#ff6700] tabular-nums">
-                  Выгода до -20%
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-xl p-3.5">
-                <div className="text-xs text-gray-300 mb-0.5">Подарок на выбор</div>
-                <div className="text-sm sm:text-base font-extrabold text-white leading-tight">
-                  Допы до 100к / Антикор
-                </div>
-              </div>
-              <div className="bg-white/10 backdrop-blur-md border border-white/15 rounded-xl p-3.5">
-                <div className="text-xs text-gray-300 mb-0.5">Иногородним</div>
-                <div className="text-sm sm:text-base font-extrabold text-white leading-tight">
-                  Полный бак бензина
-                </div>
-              </div>
-            </div>
+            <ul className="space-y-3 mb-9 text-base sm:text-lg text-gray-100">
+              <li className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6700] shrink-0" />
+                <span>Госпрограмма с выгодой до <strong>20%</strong></span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6700] shrink-0" />
+                <span>Доп. оборудование до <strong>100 000 ₽</strong> или антикор в подарок</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#ff6700] shrink-0" />
+                <span>Полный бак бензина в подарок при покупке</span>
+              </li>
+            </ul>
 
-            {/* Кнопки целевого действия */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
               <button
-                onClick={() => openCarModal(currentHero.carName)}
-                className="bg-[#ff6700] hover:bg-[#e55c00] text-white px-8 py-4 rounded-xl font-extrabold text-base transition shadow-lg whitespace-nowrap"
+                onClick={() => {
+                  setSelectedCar('');
+                  setModalType('contact');
+                }}
+                className="bg-[#ff6700] hover:bg-[#e55c00] text-white px-8 py-4 rounded-lg font-bold text-base transition shadow-lg whitespace-nowrap"
               >
                 Получить спецпредложение
               </button>
               <button
                 onClick={() => scrollToSection('stock')}
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/25 backdrop-blur-sm px-7 py-4 rounded-xl font-bold text-base transition whitespace-nowrap"
+                className="bg-white/10 hover:bg-white/20 text-white border border-white/25 backdrop-blur-sm px-7 py-4 rounded-lg font-bold text-base transition whitespace-nowrap"
               >
                 Автомобили в наличии
               </button>
-              <button
-                onClick={() => scrollToSection(currentHero.id)}
-                className="text-sm font-bold text-gray-300 hover:text-white px-3 py-2 transition whitespace-nowrap text-center"
-              >
-                Характеристики модели →
-              </button>
             </div>
           </div>
-
-          {/* Нижняя панель переключения слайдов + таймер акции (в едином блоке) */}
-          <div className="mt-10 pt-6 border-t border-white/15 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-6">
-            {/* Вкладки слайдов как на официальном портале LADA */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 flex-grow">
-              {heroSlides.map((slide, idx) => {
-                const isActive = idx === activeSlide;
-                return (
-                  <button
-                    key={slide.id}
-                    onClick={() => setActiveSlide(idx)}
-                    className={`text-left p-3 rounded-xl border transition-all ${
-                      isActive
-                        ? 'bg-white/15 border-[#ff6700] text-white shadow-sm'
-                        : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
-                    }`}
-                  >
-                    <div className="text-xs font-extrabold tracking-tight truncate">
-                      {slide.tabLabel}
-                    </div>
-                    <div className="text-[11px] text-gray-300 mt-0.5 tabular-nums truncate">
-                      {slide.priceTag}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Компактный блок таймера спецпредложения */}
-            <div className="flex flex-col sm:flex-row items-center justify-between lg:justify-end gap-3 bg-[#26303a]/90 border border-white/15 rounded-xl px-4 py-2.5 shrink-0">
-              <div className="text-center sm:text-left">
-                <div className="text-[11px] uppercase tracking-wider text-[#ff6700] font-bold">
-                  Акция ограниченного времени
-                </div>
-                <div className="text-xs text-gray-300">
-                  До конца спецпредложения:
-                </div>
-              </div>
-              <CountdownTimer />
-            </div>
-          </div>
-
-          <p className="text-[11px] text-gray-400 mt-4 leading-normal">
-            Количество автомобилей ограничено. Условия кредитования, наличие автомобилей и подробности акции уточняйте у продавцов-консультантов ДЦ «Прагматика Великие Луки» (ул. Гоголя, 4).
-          </p>
         </div>
       </section>
 
-      {/* Быстрая витрина выбора модели (Showroom Dock в стиле lada.ru) */}
-      <section className="bg-[#f5f6f8] border-b border-gray-200 py-4">
+      {/* Лаконичная полоса быстрого перехода к моделям */}
+      <section className="bg-[#f5f6f8] border-b border-gray-200 py-3.5">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-            <span className="text-xs font-extrabold uppercase tracking-wider text-gray-400 pr-2 shrink-0 hidden md:inline">
-              Модельный ряд:
-            </span>
+          <div className="flex items-center justify-start lg:justify-center gap-2 overflow-x-auto">
             {carModels.map((model) => (
               <button
                 key={model.id}
                 onClick={() => scrollToSection(model.id)}
-                className="group flex items-center gap-2 px-4 py-2 bg-white text-[#26303a] border border-gray-200 rounded-lg text-sm font-bold hover:border-[#ff6700] hover:text-[#ff6700] transition whitespace-nowrap shrink-0 shadow-sm"
+                className="px-4 py-2 bg-white text-[#26303a] border border-gray-200 rounded-lg text-sm font-bold hover:border-[#ff6700] hover:text-[#ff6700] transition whitespace-nowrap shrink-0"
               >
-                <span>{model.name}</span>
-                <span className="text-xs font-semibold text-gray-400 group-hover:text-[#ff6700]/80 tabular-nums">
-                  {model.price}
-                </span>
+                {model.name}
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="models" className="py-16 bg-gradient-to-b from-white to-gray-50">
+      <section id="models" className="py-16 lg:py-20 bg-[#f5f6f8]">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">МОДЕЛЬНЫЙ РЯД LADA</h2>
-            <p className="text-lg text-gray-600">Найди свой идеальный автомобиль LADA в официальном дилерском центре и получи специальные условия покупки</p>
+          {/* Заголовок и фильтр по типам кузова в стиле шоурума LADA */}
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#ff6700] mb-2">
+                <span className="w-2 h-2 rounded-full bg-[#ff6700]" />
+                <span>Официальный модельный ряд</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#26303a] tracking-tight">
+                МОДЕЛЬНЫЙ РЯД LADA
+              </h2>
+            </div>
+
+            {/* Табы фильтрации по кузову */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              {categories.map((cat) => {
+                const isActive = activeCategory === cat.id;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`px-4 py-2.5 rounded-xl text-sm font-bold transition whitespace-nowrap shrink-0 ${
+                      isActive
+                        ? 'bg-[#26303a] text-white shadow-sm'
+                        : 'bg-white text-gray-600 border border-gray-200 hover:border-[#ff6700] hover:text-[#26303a]'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="space-y-16">
-            {cars.map((car, idx) => (
-              <div key={idx} id={car.id} className="group scroll-mt-24">
-                <div className="bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-shadow overflow-hidden border border-gray-100">
-                  <div className="grid lg:grid-cols-2 gap-8 p-8">
-                    <div className="order-2 lg:order-1">
-                      <div className="inline-block bg-[#f7761f] text-white px-5 py-2 rounded-full text-sm font-bold mb-5 shadow-md">
-                        {car.badge}
+
+          {/* Карточки моделей в фирменном дилерском стиле */}
+          <div className="space-y-8 lg:space-y-10">
+            {filteredCars.map((car) => {
+              const isExpanded = expandedSpecsId === car.id;
+              return (
+                <div key={car.id} id={car.id} className="scroll-mt-28">
+                  <div className="bg-white rounded-3xl shadow-md hover:shadow-xl transition-shadow border border-gray-200/80 overflow-hidden">
+                    <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 p-5 sm:p-7 lg:p-8 items-start">
+                      {/* Левая колонка: Фотогалерея с бейджами */}
+                      <div className="lg:col-span-7">
+                        <CarSlider
+                          images={car.images}
+                          carName={car.name}
+                          badge={car.badge}
+                          benefit={car.benefit}
+                        />
                       </div>
-                      <h3 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">{car.name}</h3>
-                      {car.specs && car.specs.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {car.specs.map((spec, sIdx) => (
-                            <span
-                              key={sIdx}
-                              className="bg-gray-100 text-gray-700 text-xs sm:text-sm font-semibold px-3 py-1 rounded-lg border border-gray-200"
-                            >
-                              {spec}
+
+                      {/* Правая колонка: Коммерческий блок и характеристики */}
+                      <div className="lg:col-span-5 flex flex-col justify-between space-y-5">
+                        {/* Название модели и теги силовой установки */}
+                        <div>
+                          <div className="flex items-baseline justify-between gap-3 mb-2">
+                            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#26303a] tracking-tight">
+                              LADA {car.name}
+                            </h3>
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full shrink-0">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                              В наличии с ПТС
                             </span>
-                          ))}
-                        </div>
-                      )}
-                      <div className="bg-gradient-to-br from-[#303c48] to-[#f7761f] text-white rounded-2xl p-6 mb-6 shadow-lg">
-                        <div className="text-2xl font-bold mb-4 flex items-center gap-2">
-                          <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0 M12 8v6 M12 14l-2-2 M12 14l2-2 M9 17h6" />
-                          </svg>
-                          Специальное предложение
-                        </div>
-<div className="space-y-3">
-                          <div className="flex justify-between items-center border-b border-white/20 pb-2">
-                            <span className="text-orange-100">Цена</span>
-                            <span className="font-bold text-lg">{car.price}</span>
                           </div>
-                          <div className="flex justify-between items-center border-b border-white/20 pb-2">
-                            <span className="text-orange-100">Выгода</span>
-                            <span className="font-bold text-lg">{car.benefit}</span>
-                          </div>
-                          <div className="flex justify-between items-center border-b border-white/20 pb-2">
-                            <span className="text-orange-100">Госпрограмма</span>
-                            <span className="font-bold">до -20%</span>
-                          </div>
-                          <div className="flex justify-between items-center border-b border-white/20 pb-2">
-                            <span className="text-orange-100">Трейд-ин</span>
-                            <span className="font-bold">Скидка до 130 000 ₽</span>
-                          </div>
-                          <div className="flex justify-between items-center border-b border-white/20 pb-2">
-                            <span className="text-orange-100">Кредит</span>
-                            <span className="font-bold">Выгодные тарифы</span>
-                          </div>
-                          <div className="flex justify-between items-center border-b border-white/20 pb-2">
-                            <span className="text-orange-100">Допы до 100к или Антикор</span>
-                            <span className="font-bold text-right leading-tight max-w-[140px]">В подарок на выбор</span>
-                          </div>
-                          <div className="flex justify-between items-center border-b border-white/20 pb-2">
-                            <span className="text-orange-100">Иногородним</span>
-                            <span className="font-bold">Бак бензина в авто</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-orange-100">Тест-драйв</span>
-                            <span className="font-bold">Бесплатно</span>
+
+                          <div className="flex flex-wrap gap-1.5">
+                            {car.specs.map((spec, sIdx) => (
+                              <span
+                                key={sIdx}
+                                className="bg-[#f5f6f8] text-gray-700 text-xs font-semibold px-3 py-1 rounded-lg border border-gray-200/80"
+                              >
+                                {spec}
+                              </span>
+                            ))}
                           </div>
                         </div>
-                      </div>
-                      <div className="mb-6">
-                        <h4 className="font-bold text-lg mb-3 text-gray-900">Основные характеристики:</h4>
-                        <div className="grid grid-cols-2 gap-3">
-                          {car.features.map((feature, i) => (
-                            <div key={i} className="flex items-start gap-2">
-                              <svg className="w-5 h-5 text-[#f7761f] flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                              </svg>
-                              <span className="text-sm text-gray-700">{feature}</span>
+
+                        {/* Блок цены, выгоды и ежемесячного платежа */}
+                        <div className="bg-[#f5f6f8] rounded-2xl p-4 sm:p-5 border border-gray-200/80">
+                          <div className="flex flex-wrap items-end justify-between gap-4 pb-4 border-b border-gray-200">
+                            <div>
+                              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
+                                Цена с учетом акций
+                              </div>
+                              <div className="text-2xl sm:text-3xl font-extrabold text-[#26303a] tabular-nums leading-none">
+                                {car.price}
+                              </div>
                             </div>
-                          ))}
+                            <div className="text-left sm:text-right">
+                              <div className="text-xs font-semibold text-gray-500 mb-1">
+                                В кредит по госпрограмме
+                              </div>
+                              <div className="text-base sm:text-lg font-extrabold text-[#ff6700] tabular-nums leading-none">
+                                {car.monthlyPayment}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 4 ключевых привилегии в лаконичной сетке 2x2 */}
+                          <div className="grid grid-cols-2 gap-2.5 pt-3.5 text-xs sm:text-[13px] font-semibold text-[#26303a]">
+                            <div className="flex items-center gap-2">
+                              <Check className="w-4 h-4 text-[#ff6700] shrink-0" />
+                              <span>Госпрограмма до -20%</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Check className="w-4 h-4 text-[#ff6700] shrink-0" />
+                              <span>Трейд-ин до 130 000 ₽</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-[#ff6700] shrink-0" />
+                              <span>Допы до 100к / Антикор</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Sparkles className="w-4 h-4 text-[#ff6700] shrink-0" />
+                              <span>Полный бак в подарок</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 4 главных технических показателя */}
+                        <div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            {car.keyMetrics.map((metric, mIdx) => (
+                              <div
+                                key={mIdx}
+                                className="bg-white border border-gray-200 rounded-xl px-3 py-2.5"
+                              >
+                                <div className="text-[11px] font-medium text-gray-500 truncate">
+                                  {metric.label}
+                                </div>
+                                <div className="text-xs sm:text-sm font-extrabold text-[#26303a] tabular-nums mt-0.5 truncate">
+                                  {metric.value}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+
+                          {/* Раскрывающийся список полных характеристик */}
+                          <button
+                            type="button"
+                            onClick={() => setExpandedSpecsId(isExpanded ? null : car.id)}
+                            className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-[#ff6700] transition"
+                          >
+                            <span>{isExpanded ? 'Скрыть подробные характеристики' : 'Все технические характеристики'}</span>
+                            <ChevronDown
+                              className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                            />
+                          </button>
+
+                          {isExpanded && (
+                            <div className="mt-2.5 p-3.5 bg-[#f5f6f8] rounded-xl border border-gray-200 grid sm:grid-cols-2 gap-2 text-xs text-gray-700">
+                              {car.features.map((feature, fIdx) => (
+                                <div key={fIdx} className="flex items-center gap-2">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-[#ff6700] shrink-0" />
+                                  <span>{feature}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Конверсионный блок кнопок */}
+                        <div className="space-y-2.5 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => openCarModal(`LADA ${car.name}`)}
+                            className="w-full bg-[#ff6700] hover:bg-[#e55c00] text-white py-3.5 px-6 rounded-xl font-extrabold text-base transition shadow-md"
+                          >
+                            Получить спецпредложение
+                          </button>
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedCar(`LADA ${car.name}`);
+                                setModalType('testdrive');
+                              }}
+                              className="inline-flex items-center justify-center gap-2 bg-[#26303a] hover:bg-[#182026] text-white py-3 px-4 rounded-xl font-bold text-xs sm:text-sm transition"
+                            >
+                              <Calendar className="w-4 h-4 text-[#ff6700] shrink-0" />
+                              <span>Тест-драйв</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleViewModelInStock(car.name)}
+                              className="inline-flex items-center justify-center gap-2 bg-white hover:bg-gray-50 text-[#26303a] border border-gray-300 hover:border-[#ff6700] py-3 px-4 rounded-xl font-bold text-xs sm:text-sm transition"
+                            >
+                              <CarIcon className="w-4 h-4 text-[#ff6700] shrink-0" />
+                              <span>Авто в наличии</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-3">
-                        <button
-                          onClick={() => openCarModal(car.name)}
-                          className="w-full bg-[#303c48] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#f7761f] transition shadow-md"
-                        >
-                          УЗНАТЬ ПОДРОБНЕЕ
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedCar(car.name);
-                            setModalType('testdrive');
-                          }}
-                          className="w-full bg-gray-100 text-gray-900 py-4 rounded-xl font-bold text-lg hover:bg-[#f7761f] hover:text-white transition shadow-md"
-                        >
-                          ЗАПИСАТЬСЯ НА ТЕСТ-ДРАЙВ
-                        </button>
-                      </div>
-                    </div>
-                    <div className="order-1 lg:order-2">
-                      <CarSlider images={car.images} carName={car.name} />
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <CarsInStock onReserve={handleReserve} />
+      <CarsInStock
+        onReserve={handleReserve}
+        externalFilterRequest={stockFilterRequest}
+      />
 
       <section id="test-drive" className="py-16 bg-gradient-to-br from-[#303c48] to-gray-800 text-white">
         <div className="container mx-auto px-4">
@@ -864,47 +1047,6 @@ function App() {
           <p className="text-sm text-green-100">Мы свяжемся с вами в ближайшее время</p>
         </div>
       )}
-    </div>
-  );
-}
-
-function CountdownTimer() {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
-
-  // === ИСПРАВЛЕННЫЙ ТАЙМЕР ===
-  useEffect(() => {
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const endOfDay = new Date();
-      endOfDay.setHours(23, 59, 59, 999);
-      const difference = endOfDay.getTime() - now.getTime();
-      return {
-        hours: Math.floor(difference / (1000 * 60 * 60)),
-        minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((difference % (1000 * 60)) / 1000),
-      };
-    };
-
-    setTimeLeft(calculateTimeLeft());
-    const timer = setInterval(() => setTimeLeft(calculateTimeLeft()), 1000);
-    return () => clearInterval(timer);
-  }, []); // Добавлен пустой массив зависимостей
-  // === КОНЕЦ ИСПРАВЛЕНИЯ ===
-
-  return (
-    <div className="flex gap-2">
-      <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px] text-center text-white">
-        <div className="text-xl font-bold">{String(timeLeft.hours).padStart(2, '0')}</div>
-        <div className="text-xs opacity-90">часов</div>
-      </div>
-      <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px] text-center text-white">
-        <div className="text-xl font-bold">{String(timeLeft.minutes).padStart(2, '0')}</div>
-        <div className="text-xs opacity-90">минут</div>
-      </div>
-      <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-2 min-w-[60px] text-center text-white">
-        <div className="text-xl font-bold">{String(timeLeft.seconds).padStart(2, '0')}</div>
-        <div className="text-xs opacity-90">секунд</div>
-      </div>
     </div>
   );
 }
