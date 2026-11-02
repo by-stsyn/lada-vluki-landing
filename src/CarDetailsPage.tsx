@@ -121,25 +121,41 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
         }
       `}</style>
       
-      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 shadow-sm flex-shrink-0">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+      <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm flex-shrink-0">
+        <div className="hidden lg:block bg-[#26303a] text-gray-200 text-xs border-b border-white/10">
+          <div className="container mx-auto px-4 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-2 text-gray-300 font-medium">
+              <span>Официальный дилер LADA</span>
+              <span aria-hidden="true" className="text-gray-500">·</span>
+              <span className="text-white font-semibold">Прагматика Великие Луки</span>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className="text-gray-200">г. Великие Луки, ул. Гоголя, 4</span>
+              <span aria-hidden="true" className="text-gray-600">|</span>
+              <span className="text-gray-200">Ежедневно: 08:00 – 20:00</span>
+            </div>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-4">
-            <button onClick={navigateHome} className="text-gray-600 hover:text-brand-orange transition flex items-center gap-2 font-semibold bg-gray-100 px-3 py-2 rounded-lg">
-              <ArrowLeft className="w-5 h-5" />
-              <span className="hidden sm:inline">В каталог</span>
+            <button onClick={navigateHome} className="text-[#26303a] hover:text-[#ff6700] transition flex items-center gap-2 font-bold bg-gray-100 hover:bg-gray-200/70 px-3.5 py-2 rounded-lg text-sm">
+              <ArrowLeft className="w-4 h-4" />
+              <span>В каталог</span>
             </button>
             <span className="text-gray-300 hidden sm:inline">|</span>
             <img src="/logo-lada.svg" alt="LADA" className="h-6 sm:h-7 hidden sm:block" />
-            <span className="text-gray-300 hidden md:inline">|</span>
-            <span className="text-sm font-semibold text-gray-800 hidden md:inline">Прагматика Великие Луки</span>
+            <div className="hidden md:block">
+              <div className="text-xs font-extrabold text-[#26303a] leading-none">ПРАГМАТИКА ВЕЛИКИЕ ЛУКИ</div>
+              <div className="text-[11px] text-gray-500 mt-0.5 leading-none">ул. Гоголя, 4 · 08:00 – 20:00</div>
+            </div>
           </div>
           <a 
             href="tel:+78115395565" 
             onClick={() => trackGoal('zvonok')}
-            className="flex items-center gap-2 text-sm font-bold text-gray-900 hover:text-brand-orange transition"
+            className="flex items-center gap-2 text-sm sm:text-base font-extrabold text-[#26303a] hover:text-[#ff6700] transition tabular-nums"
           >
-            <Phone className="w-5 h-5" />
-            <span className="text-base sm:text-lg">+7 (811) 539-55-65</span>
+            <Phone className="w-4 h-4 text-[#ff6700]" />
+            <span>+7 (811) 539-55-65</span>
           </a>
         </div>
       </header>
