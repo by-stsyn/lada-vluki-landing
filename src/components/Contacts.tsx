@@ -143,7 +143,7 @@ export default function Contacts({ onOpenContactModal }: ContactsProps) {
                   <h4 className="font-bold text-lg text-gray-900 mb-1">ТЕЛЕФОН</h4>
                   <a
                     href="tel:+78115395565"
-                    className="text-[#f7761f] hover:text-[#e66718] font-bold text-xl"
+                    className="calltouch_phone text-[#ff6700] hover:text-[#e55c00] font-bold text-xl tabular-nums"
                     onClick={() => trackGoal('zvonok')}
                   >
                     +7 (811) 539-55-65

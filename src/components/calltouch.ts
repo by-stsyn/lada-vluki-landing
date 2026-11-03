@@ -13,7 +13,7 @@ export const formatPhoneInput = (rawValue: string): string => {
   let val = rawValue.replace(/\D/g, '');
   if (!val) return '';
 
-  // Handle paste/autofill of 11-digit number (+7... or 8...) into an input that already had "+7"
+  // Обработка автозаполнения/вставки 11-значного номера (+7... или 8...) в поле, где уже было "+7"
   if (val.length >= 12 && (val.startsWith('77') || val.startsWith('78'))) {
     val = val.substring(1);
   }
@@ -43,7 +43,7 @@ export const saveUtmParams = () => {
         localStorage.setItem(key, val);
       }
     });
-  } catch (e) {
+  } catch {
     // ignore storage errors
   }
 };
@@ -115,7 +115,7 @@ export const sendToCalltouch = async ({
   subject: string;
   comment?: string;
   tags?: string;
-}) => {
+}): Promise<boolean> => {
   try {
     const cleanPhone = phone.replace(/\D/g, '');
     const utm = getUtmParams();
@@ -143,7 +143,7 @@ export const sendToCalltouch = async ({
       .filter(Boolean)
       .join(',');
 
-    // Ensure subject always contains the city signature
+    // Гарантируем подпись города Великие Луки в теме заявки
     const finalSubject = subject.includes('Великие Луки')
       ? subject
       : `${subject} (Великие Луки)`;
@@ -163,11 +163,11 @@ export const sendToCalltouch = async ({
       ctParams.append('sessionId', sessionId);
     }
 
-    // Send to configured site_id or both 16642 (from Calltouch API settings) and 51665
+    // Отправка на site_id 16642 (из настроек API Calltouch) и 51665
     const envSiteId = import.meta.env.VITE_CALLTOUCH_SITE_ID;
     const siteIds = envSiteId ? [envSiteId] : ['16642', '51665'];
 
-    await Promise.allSettled(
+    const results = await Promise.allSettled(
       siteIds.map((siteId) =>
         fetch(`https://api.calltouch.ru/calls-service/RestAPI/requests/${siteId}/register/`, {
           method: 'POST',
@@ -178,8 +178,10 @@ export const sendToCalltouch = async ({
         })
       )
     );
+
+    return results.some((r) => r.status === 'fulfilled' && r.value.ok);
   } catch (err) {
     console.error('Calltouch error:', err);
+    return false;
   }
 };
-

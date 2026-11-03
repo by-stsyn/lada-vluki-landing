@@ -400,7 +400,7 @@ function App() {
                     <Phone className="w-4 h-4" />
                   </span>
                   <Phone className="w-4 h-4 text-[#ff6700] hidden sm:inline shrink-0" />
-                  <span>+7 (811) 539-55-65</span>
+                  <span className="calltouch_phone">+7 (811) 539-55-65</span>
                 </a>
                 <div className="hidden sm:block text-[11px] text-gray-500 font-medium leading-none mt-0.5">
                   Ежедневно с 08:00 до 20:00

@@ -155,7 +155,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
             className="flex items-center gap-2 text-sm sm:text-base font-extrabold text-[#26303a] hover:text-[#ff6700] transition tabular-nums"
           >
             <Phone className="w-4 h-4 text-[#ff6700]" />
-            <span>+7 (811) 539-55-65</span>
+            <span className="calltouch_phone">+7 (811) 539-55-65</span>
           </a>
         </div>
       </header>
