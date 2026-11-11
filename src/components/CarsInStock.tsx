@@ -210,7 +210,7 @@ export const CarsInStock = ({
         </div>
 
         {/* Фирменная панель фильтрации */}
-        <div className="bg-[#f5f6f8] border border-gray-200/90 rounded-2xl p-4 sm:p-6 mb-10 shadow-xs">
+        <div className="bg-[#f5f6f8] border border-gray-200/90 rounded-2xl p-4 sm:p-6 mb-10 shadow-sm">
           {/* 1-й ряд: Быстрый выбор модели с количеством авто */}
           <div className="mb-5">
             <div className="flex items-center justify-between mb-2.5">
@@ -236,7 +236,7 @@ export const CarsInStock = ({
                 onClick={() => setModelFilter("all")}
                 className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition ${
                   modelFilter === "all"
-                    ? "bg-[#26303a] text-white border-[#26303a] shadow-xs"
+                    ? "bg-[#26303a] text-white border-[#26303a] shadow-sm"
                     : "bg-white text-[#26303a] border-gray-200 hover:border-[#ff6700]"
                 }`}
               >
@@ -261,7 +261,7 @@ export const CarsInStock = ({
                     onClick={() => setModelFilter(name)}
                     className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold border transition ${
                       isActive
-                        ? "bg-[#ff6700] text-white border-[#ff6700] shadow-xs"
+                        ? "bg-[#ff6700] text-white border-[#ff6700] shadow-sm"
                         : "bg-white text-[#26303a] border-gray-200 hover:border-[#ff6700]"
                     }`}
                   >

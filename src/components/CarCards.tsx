@@ -51,6 +51,7 @@ export const CarCard = ({
           src={car.photos?.[index] || "/promo-lada.webp"}
           alt={`${car.brand} ${car.model} ${car.complectation}`}
           loading="lazy"
+          decoding="async"
           onError={(e) => {
             const target = e.currentTarget;
             if (!target.src.endsWith("/promo-lada.webp")) {
@@ -62,13 +63,13 @@ export const CarCard = ({
 
         {/* Верхние бейджи */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2 pointer-events-none z-10">
-          <span className="inline-flex items-center gap-1.5 bg-[#26303a]/90 backdrop-blur-xs text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-xs">
+          <span className="inline-flex items-center gap-1.5 bg-[#26303a]/90 backdrop-blur-sm text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
             В наличии с ПТС
           </span>
 
           {benefit > 0 && (
-            <span className="bg-[#ff6700] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg shadow-xs tabular-nums">
+            <span className="bg-[#ff6700] text-white text-[11px] font-extrabold px-2.5 py-1 rounded-lg shadow-sm tabular-nums">
               Выгода {benefit.toLocaleString("ru-RU")} ₽
             </span>
           )}
@@ -94,7 +95,7 @@ export const CarCard = ({
               <ChevronRight className="w-4 h-4" />
             </button>
 
-            <div className="absolute bottom-2.5 right-3 z-10 bg-black/55 backdrop-blur-xs text-white text-[11px] font-semibold px-2 py-0.5 rounded-md tabular-nums pointer-events-none">
+            <div className="absolute bottom-2.5 right-3 z-10 bg-black/55 backdrop-blur-sm text-white text-[11px] font-semibold px-2 py-0.5 rounded-md tabular-nums pointer-events-none">
               {index + 1} / {car.photos.length}
             </div>
           </>

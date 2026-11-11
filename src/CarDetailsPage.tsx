@@ -109,18 +109,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
   const baseCarName = [car.brand, car.model].filter(Boolean).join(' ');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-200 animate-gradient-xy flex flex-col">
-      <style>{`
-        @keyframes gradient-xy {
-          0%, 100% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-        }
-        .animate-gradient-xy {
-          background-size: 200% 200%;
-          animation: gradient-xy 15s ease infinite;
-        }
-      `}</style>
-      
+    <div className="min-h-screen bg-[#f5f6f8] flex flex-col">
       <header className="bg-white/95 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-sm flex-shrink-0">
         <div className="hidden lg:block bg-[#26303a] text-gray-200 text-xs border-b border-white/10">
           <div className="container mx-auto px-4 py-2 flex items-center justify-between">
@@ -162,7 +151,7 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
 
       <main className="container mx-auto px-4 py-8 max-w-7xl flex-grow">
         <div className="mb-8">
-            <div className="inline-block bg-brand-orange text-white px-4 py-1.5 rounded-full text-xs font-bold mb-4 shadow-sm tracking-wide">
+            <div className="inline-block bg-[#ff6700] text-white px-4 py-1.5 rounded-full text-xs font-bold mb-4 shadow-sm tracking-wide">
               АВТОМОБИЛЬ В НАЛИЧИИ
             </div>
             <h1 className="text-3xl md:text-5xl font-bold text-gray-900 flex flex-wrap items-baseline gap-3">
@@ -174,11 +163,11 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white/70 backdrop-blur-sm p-6 md:p-8 rounded-3xl shadow-lg border border-gray-100">
+            <div className="bg-white p-6 md:p-8 rounded-3xl shadow-md border border-gray-200/80">
               {car.photos && car.photos.length > 0 ? (
                 <>
                   <div className="relative group h-[300px] sm:h-[400px] md:h-[500px] bg-gray-100 rounded-2xl overflow-hidden mb-4">
-                    <img src={activePhoto} alt={baseCarName} loading="lazy" onError={handleImgError} className="w-full h-full object-cover" />
+                    <img src={activePhoto} alt={baseCarName} decoding="async" onError={handleImgError} className="w-full h-full object-cover" />
                     {car.photos.length > 1 && (
                       <>
                         <button onClick={prevPhoto} className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/40 text-white w-12 h-12 rounded-full hover:bg-black/60 transition opacity-80 lg:opacity-0 lg:group-hover:opacity-100 flex items-center justify-center"><ChevronLeft className="w-7 h-7" /></button>
@@ -188,8 +177,8 @@ export default function CarDetailsPage({ carId }: { carId: string }) {
                   </div>
                   <div ref={thumbnailsContainerRef} className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                     {car.photos.map((photo) => (
-                      <button key={photo} data-photo-url={photo} onClick={() => setActivePhoto(photo)} className={`flex-shrink-0 w-24 h-20 md:w-32 md:h-24 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-gray-100 ${activePhoto === photo ? 'border-brand-orange ring-4 ring-orange-500/20' : 'border-transparent opacity-60 hover:opacity-100'}`}>
-                        <img src={photo} alt="" loading="lazy" onError={handleImgError} className="w-full h-full object-cover" /> 
+                      <button key={photo} data-photo-url={photo} onClick={() => setActivePhoto(photo)} className={`flex-shrink-0 w-24 h-20 md:w-32 md:h-24 rounded-xl overflow-hidden border-2 transition-all duration-300 bg-gray-100 ${activePhoto === photo ? 'border-[#ff6700] ring-2 ring-[#ff6700]/20' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+                        <img src={photo} alt="" loading="lazy" decoding="async" onError={handleImgError} className="w-full h-full object-cover" /> 
                       </button>
                     ))}
                   </div>

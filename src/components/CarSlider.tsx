@@ -31,6 +31,7 @@ export default function CarSlider({ images, carName, badge, benefit }: CarSlider
           src={images[currentIndex]}
           alt={`LADA ${carName} — фото ${currentIndex + 1}`}
           loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
         />
 
@@ -66,7 +67,7 @@ export default function CarSlider({ images, carName, badge, benefit }: CarSlider
           <ChevronRight className="w-5 h-5" />
         </button>
 
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/30 backdrop-blur-xs px-2.5 py-1 rounded-full">
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 bg-black/35 backdrop-blur-sm px-2.5 py-1 rounded-full">
           {images.map((_, index) => (
             <button
               key={index}
@@ -91,7 +92,7 @@ export default function CarSlider({ images, carName, badge, benefit }: CarSlider
             onClick={() => goToSlide(index)}
             className={`bg-[#f5f6f8] rounded-xl h-16 sm:h-20 lg:h-24 overflow-hidden transition-all border-2 ${
               index === currentIndex
-                ? 'border-[#ff6700] shadow-xs opacity-100'
+                ? 'border-[#ff6700] shadow-sm opacity-100'
                 : 'border-transparent opacity-65 hover:opacity-100'
             }`}
           >
@@ -99,6 +100,7 @@ export default function CarSlider({ images, carName, badge, benefit }: CarSlider
               src={image}
               alt={`LADA ${carName} миниатюра ${index + 1}`}
               loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover object-center"
             />
           </button>

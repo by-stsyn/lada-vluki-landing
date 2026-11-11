@@ -1,5 +1,5 @@
-const CACHE_KEY = "lada_cars_cache_v5";
-const CACHE_TTL = 24 * 60 * 60 * 1000;
+const CACHE_KEY = "lada_cars_cache_v6";
+const CACHE_TTL = 15 * 60 * 1000; // 15 минут свежести кэша
 
 export type Car = {
   id: string;
@@ -58,6 +58,55 @@ const saveCache = (cars: Car[]) => {
   }
 };
 
+const fetchFreshCarsFromNetwork = async (): Promise<Car[]> => {
+  let data: any = null;
+
+  // 1. На самом домене Reg.ru запрашиваем локальный /cars.php
+  if (!import.meta.env.DEV) {
+    try {
+      const phpRes = await fetchWithTimeout("/cars.php", 6000);
+      if (phpRes.ok) {
+        const text = await phpRes.text();
+        const parsed = JSON.parse(text);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          data = parsed;
+        }
+      }
+    } catch {
+      // переход к резервному варианту
+    }
+  }
+
+  // 2. В режиме разработки или превью запрашиваем напрямую с боевого домена на Reg.ru
+  if (!data) {
+    try {
+      const res = await fetchWithTimeout("https://sales.lada-vluki.ru/cars.php", 6000);
+      if (res.ok) {
+        const parsed = await res.json();
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          data = parsed;
+        }
+      }
+    } catch {
+      // переход к локальному снапшоту
+    }
+  }
+
+  // 3. Мгновенный локальный резерв /cars-fallback.json
+  if (!data) {
+    const fallbackRes = await fetch("/cars-fallback.json");
+    if (fallbackRes.ok) {
+      data = await fallbackRes.json();
+    }
+  }
+
+  const ladaCars = normalizeLadaCars(data);
+  if (ladaCars.length > 0) {
+    saveCache(ladaCars);
+  }
+  return ladaCars;
+};
+
 export const fetchCars = async (): Promise<Car[]> => {
   try {
     if (typeof window !== "undefined") {
@@ -65,12 +114,13 @@ export const fetchCars = async (): Promise<Car[]> => {
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
           const parsed = JSON.parse(cached);
-          if (
-            parsed &&
-            Array.isArray(parsed.data) &&
-            parsed.data.length > 0 &&
-            Date.now() - parsed.timestamp < CACHE_TTL
-          ) {
+          if (parsed && Array.isArray(parsed.data) && parsed.data.length > 0) {
+            const isFresh = Date.now() - parsed.timestamp < CACHE_TTL;
+            if (isFresh) {
+              return parsed.data;
+            }
+            // Stale-while-revalidate: мгновенно отдаем кэш и тихо обновляем в фоне
+            fetchFreshCarsFromNetwork().catch(() => {});
             return parsed.data;
           }
         }
@@ -79,64 +129,9 @@ export const fetchCars = async (): Promise<Car[]> => {
       }
     }
 
-    let data: any = null;
-
-    // 1. На самом домене Reg.ru запрашиваем локальный /cars.php
-    if (!import.meta.env.DEV) {
-      try {
-        const phpRes = await fetchWithTimeout("/cars.php", 6000);
-        if (phpRes.ok) {
-          const text = await phpRes.text();
-          const parsed = JSON.parse(text);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            data = parsed;
-          }
-        }
-      } catch {
-        // переход к резервному варианту
-      }
-    }
-
-    // 2. В режиме разработки или превью запрашиваем напрямую с боевого домена на Reg.ru
-    if (!data) {
-      try {
-        const res = await fetchWithTimeout("https://sales.lada-vluki.ru/cars.php", 6000);
-        if (res.ok) {
-          const parsed = await res.json();
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            data = parsed;
-          }
-        }
-      } catch {
-        // переход к локальному снапшоту
-      }
-    }
-
-    // 3. Мгновенный локальный резерв /cars-fallback.json
-    if (!data) {
-      const fallbackRes = await fetch("/cars-fallback.json");
-      if (fallbackRes.ok) {
-        data = await fallbackRes.json();
-      }
-    }
-
-    const ladaCars = normalizeLadaCars(data);
-    saveCache(ladaCars);
-    return ladaCars;
+    return await fetchFreshCarsFromNetwork();
   } catch (error) {
     console.error("Ошибка загрузки LADA:", error);
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed?.data)) return parsed.data;
-        }
-      } catch {
-        // ignore
-      }
-    }
     return [];
   }
 };
-

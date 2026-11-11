@@ -477,6 +477,7 @@ function App() {
           <img
             src="/promo-lada.webp"
             alt="Модельный ряд LADA"
+            decoding="async"
             className="w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#182026]/95 via-[#182026]/80 to-[#182026]/10" />
